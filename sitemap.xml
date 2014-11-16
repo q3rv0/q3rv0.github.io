@@ -1,14 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>http://q3rv0.github.io/blog/2014/11/17/hola-mundo/</loc>
+    <lastmod>2014-11-17T02:28:06+06:30</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>http://q3rv0.github.io/</loc>
-    <lastmod>2014-11-17T02:26:04+06:30</lastmod>
+    <lastmod>2014-11-17T02:46:39+06:30</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>http://q3rv0.github.io/blog/archives/</loc>
-    <lastmod>2014-11-17T02:26:04+06:30</lastmod>
+    <lastmod>2014-11-17T02:46:39+06:30</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
