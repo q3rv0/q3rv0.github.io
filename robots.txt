@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: 
+
+Sitemap: http://q3rv0.github.io/sitemap.xml 
