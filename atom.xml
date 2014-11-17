@@ -4,7 +4,7 @@
   <title><![CDATA[Security]]></title>
   <link href="http://q3rv0.github.io/atom.xml" rel="self"/>
   <link href="http://q3rv0.github.io/"/>
-  <updated>2014-11-17T08:07:05+06:30</updated>
+  <updated>2014-11-17T08:13:59+06:30</updated>
   <id>http://q3rv0.github.io/</id>
   <author>
     <name><![CDATA[q3rv0]]></name>
@@ -12,5 +12,17 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Sqli File Inclusion]]></title>
+    <link href="http://q3rv0.github.io/blog/2014/11/17/sqli-file-inclusion/"/>
+    <updated>2014-11-17T08:12:34+06:30</updated>
+    <id>http://q3rv0.github.io/blog/2014/11/17/sqli-file-inclusion</id>
+    <content type="html"><![CDATA[<p>En este video pretendo mostrar como a travez de una SQLI se accede a ficheros internos en el servidor, en la intrusion Crackx y yo, nos topamos con el .bash_history del usuario root<!--more-->, parece ser q el administardor agrega usuarios y cambia el password de una manera poco segura diria yo…XD!, gracias a esta falencia logramos acceder al ftp del vps y subir una webshell.</p>
+
+<div class="embed-video-container"><iframe src="//www.youtube.com/embed/VTzpW8OgLts" allowfullscreen></iframe></div>
+
+]]></content>
+  </entry>
   
 </feed>
