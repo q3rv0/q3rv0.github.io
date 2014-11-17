@@ -4,7 +4,7 @@
   <title><![CDATA[Security]]></title>
   <link href="http://q3rv0.github.io/atom.xml" rel="self"/>
   <link href="http://q3rv0.github.io/"/>
-  <updated>2014-11-17T08:13:59+06:30</updated>
+  <updated>2014-11-17T08:20:56+06:30</updated>
   <id>http://q3rv0.github.io/</id>
   <author>
     <name><![CDATA[q3rv0]]></name>
@@ -12,6 +12,25 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Backdoor via Inyeccion]]></title>
+    <link href="http://q3rv0.github.io/blog/2014/11/17/backdoor-via-inyeccion/"/>
+    <updated>2014-11-17T08:19:41+06:30</updated>
+    <id>http://q3rv0.github.io/blog/2014/11/17/backdoor-via-inyeccion</id>
+    <content type="html"><![CDATA[<p>Cuando se trata de vulnerabilidades de inyeccion de codigo tengo que decir que me encanta, hoy le traigo una manera de conseguir un backdoor en el servidor a travez de una de estas. hay veces que se logra realizar inyecciones de manera satisfactoria dumpeando datos de passwords en texto plano o encriptadas, pero si el<!--more--->panel del administrador esta desabilitado
+u no se logra romper el hash o cualquier situacion negativa que
+haga que esa informacion no sirva para nada, entonces que
+hacemos?</p>
+
+<p>Aca dejo un documento que escribi en la tarde, donde se muestra como inyectar codigo php remotamente, a travez de una sqli.</p>
+
+<iframe src="http://www.slideshare.net/slideshow/embed_code/12581123 " width="595" height="446" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC;border-width:1px 1px 0;margin-bottom:5px" allowfullscreen></iframe>
+
+
+<p></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Sqli File Inclusion]]></title>
