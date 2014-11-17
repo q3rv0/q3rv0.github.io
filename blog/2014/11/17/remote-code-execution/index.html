@@ -1,0 +1,309 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Remote Code Execution - Security</title>
+  <meta name="author" content="q3rv0">
+
+  
+  <meta name="description" content="La ejecucion remota de comandos, como su nombre lo dice, es una vulnerabilidad
+que nos permite inyectar ordenes remotamente en el sistema, &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://q3rv0.github.io/blog/2014/11/17/remote-code-execution">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Security" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Security</a></h1>
+  
+    <h2>Follow the white rabbit&#8230;.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:q3rv0.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Remote Code Execution</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2014-11-17T10:04:38+06:30'><span class='date'><span class='date-month'>Nov</span> <span class='date-day'>17</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>10:04 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>La ejecucion remota de comandos, como su nombre lo dice, es una vulnerabilidad
+que nos permite inyectar ordenes remotamente en el sistema, basicamente se
+debe a un mal filtrado de variables que utilizan funciones como:<!--more--></p>
+
+<p>system()</p>
+
+<p>passthru()</p>
+
+<p>shell_exec()</p>
+
+<p>exec()</p>
+
+<p>ssh2_exec()</p>
+
+<p>Y demas funciones php que permiten la ejecucion de comandos en el OS.</p>
+
+<p>Hay ciertas webs, que utilizan scripts que se encargan de interactuar
+con los datos que el usuario provee en la aplicacion, muchos de ustedes
+seguramente habran echo uso de servicios de fingerprinting online, los cuales
+nos permiten utilizar comandos como whois, ping, dig, nslookup, etc</p>
+
+<p><img src="http://i.imgur.com/BFcGN.png"></p>
+
+<p>justamente de este tipo de webs hablo, si no se aplica una correcta seguridad en la aplicacion podria ser brutal para la misma, ya que cualquier usuario con conocimientos se podria aprovechar del mal filtro y lanzar comandos arbitrariamente en el sistema oporativo.</p>
+
+<p>En si la explotacion de este tipo de vulnerabilidad no conlleva una complicaion
+en cuanto al uso de vectores largos, salvo que en el servidor victima este
+corriendo mod_security o algun otro tipo de waf con sus respectivos filtros. La
+idea no es explicar a evadir los mismos, si no mostrar que tan sencillo es explotar esta tecnica.</p>
+
+<p>Vamos a ver un posible codigo vulnerable.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">&lt;?</span><span class="nx">php</span>
+</span><span class='line'><span class="k">if</span> <span class="p">(</span><span class="nb">isset</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">&#39;boton-ping&#39;</span><span class="p">]))</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nv">$objetivo</span><span class="o">=</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">&#39;target&#39;</span><span class="p">];</span>
+</span><span class='line'>    <span class="k">echo</span> <span class="s2">&quot;&lt;pre class=”report-header”&gt;&quot;</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">echo</span> <span class="nb">shell_exec</span><span class="p">(</span><span class="s2">&quot; nslookup &quot;</span> <span class="o">.</span><span class="nv">$objetivo</span><span class="p">);</span>
+</span><span class='line'>    <span class="k">echo</span> <span class="s2">&quot;&lt;/pre&gt;&quot;</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="cp">?&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Vemos como toma los valores del usuario a travez de POST, y luego ejecuta
+la entrada con nslookup, a todo esto, no hay una sola verificacion de variables, desp voy a explicar como se puede corregir el script.</p>
+
+<p>Como se puede aprovechar de la ineficiencia de un programador?</p>
+
+<p>Sencillamente, usando una | (tuberia pipe) o ; (actua como separador de comandos)</p>
+
+<p>Supongamos que quisieramos averiguar la version del kernel.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'> 
+</span><span class='line'>10.x.x.x<span class="p">|</span>uname -a
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>o</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>10.x.x.x <span class="p">;</span> uname -a
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>De esta manera el script quedaria sano y salvo a la entrada de comandos por parte de un atacante.
+El codigo se ejecutaria de la siguiente manera en el script.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>nslookup 10.x.x.x<span class="p">|</span>uname -a
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Lo cual terminaria imprimiendo la version del kernel.</p>
+
+<p>Sencillo no??.</p>
+
+<p>Como se puede corregir esta vulnerabilidad?</p>
+
+<p>– Validando la entrada de datos con funciones como escapeshellarg(), escapeshellcmd()</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">&lt;?</span><span class="nx">php</span>
+</span><span class='line'><span class="k">if</span> <span class="p">(</span><span class="nb">isset</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">&#39;boton-ping&#39;</span><span class="p">]))</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nv">$objetivo</span><span class="o">=</span><span class="nb">escapeshellcmd</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">&#39;target&#39;</span><span class="p">]);</span>
+</span><span class='line'>    <span class="k">echo</span> <span class="s2">&quot;&lt;pre class=”report-header”&gt;&quot;</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">echo</span> <span class="nb">shell_exec</span><span class="p">(</span><span class="s2">&quot; nslookup &quot;</span> <span class="o">.</span><span class="nv">$objetivo</span><span class="p">);</span>
+</span><span class='line'>    <span class="k">echo</span> <span class="s2">&quot;&lt;/pre&gt;&quot;</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="cp">?&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>De esta manera el script quedaria sano y salvo a la entrada de comandos por parte de un atacante.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">q3rv0</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2014-11-17T10:04:38+06:30'><span class='date'><span class='date-month'>Nov</span> <span class='date-day'>17</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>10:04 am</span></time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://q3rv0.github.io/blog/2014/11/17/remote-code-execution/" data-via="q3rv0" data-counturl="http://q3rv0.github.io/blog/2014/11/17/remote-code-execution/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/11/17/xss-a-travez-de-error/" title="Previous Post: xss a travez de error">&laquo; xss a travez de error</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/11/17/kbeast-plantando-un-rootkit/" title="Next Post: [KBEAST] Plantando un Rootkit">[KBEAST] Plantando un Rootkit &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/11/17/blind-mysqli-time-based-teoria/">Blind Mysqli Time Based [Teoria]</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/17/sqli-plus-mod-security-bypass/">SQLI+Mod_Security Bypass</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/17/kbeast-plantando-un-rootkit/">[KBEAST] Plantando Un Rootkit</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/17/remote-code-execution/">Remote Code Execution</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/17/xss-a-travez-de-error/">Xss a Travez De Error</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - q3rv0 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

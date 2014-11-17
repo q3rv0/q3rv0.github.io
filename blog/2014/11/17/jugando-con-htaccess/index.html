@@ -1,0 +1,328 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Jugando Con .htaccess - Security</title>
+  <meta name="author" content="q3rv0">
+
+  
+  <meta name="description" content="La mayoria ya conoce cual es la funcion de este archivo en el servidor encargandose de actuar sobre el fichero de configuracion de apache “httpd.conf &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://q3rv0.github.io/blog/2014/11/17/jugando-con-htaccess">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Security" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Security</a></h1>
+  
+    <h2>Follow the white rabbit&#8230;.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:q3rv0.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Jugando Con .htaccess</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2014-11-17T09:27:30+06:30'><span class='date'><span class='date-month'>Nov</span> <span class='date-day'>17</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>9:27 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>La mayoria ya conoce cual es la funcion de este archivo en el servidor encargandose de actuar sobre el fichero de configuracion de apache “httpd.conf”</p>
+
+<p>Permite:</p>
+
+<p>Redireccion de url’s</p>
+
+<p>Respuestas de error personalizadas.</p>
+
+<p>Proteccion de directorios, subdirectorios y ficheros en el servidor.</p>
+
+<p>Certificados de autentificacion http.</p>
+
+<p>etc…</p>
+
+<!--more-->
+
+
+<p>No vengo a escribrir de como implementar cada una de sus funciones.</p>
+
+<p>En la Black-Hat pasada se hablo de una supuesta vulnerabilidad en .htaccess, yo creo que mas que una vulnerabilidad es solo una mala implementacion del metodo &ldquo;Limit&rdquo; cuando se desea restringir el acceso a cierto directorio/fichero presentando un certificado de autentificacion http.</p>
+
+<p>En cuanto a estos tipos de certificados tenemos los:</p>
+
+<p>Basicos: La contraseña viaja en texto plano</p>
+
+<p>Resumen: El servidor le aplica un hash al password antes de ser enviado.</p>
+
+<p>En la siguiente imagen podemos encontrar un servidor que implementa un certificado de tipo basico.</p>
+
+<p><img src="http://i.imgur.com/jJOj8.png"></p>
+
+<p>Conociendo la cantidad de admins que andan sueltos, Podriamos deducir para suerte nuestra que nos estariamos encontrando con un .htaccess configurado de la siguiente manera (supongamos).</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>AuthUserFile .htpasswd
+</span><span class='line'>AuthName "Area Radioactiva"
+</span><span class='line'>AuthType Basic
+</span><span class='line'> 
+</span><span class='line'>&lt;Limit GET>
+</span><span class='line'>require valid-user
+</span><span class='line'>&lt;/Limit></span></code></pre></td></tr></table></div></figure>
+
+
+<p>Donde esta la mala implementacion?</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;Limit GET></span></code></pre></td></tr></table></div></figure>
+
+
+<p>Vemos que solo se limita a peticiones GET, dejando de lado TRACE, OPTIONS, POST, PUT, COPY, MOVE, DELETE, TRACK, etc, entre otras.</p>
+
+<p>Podriamos obtener el contenido de algun fichero detras de la proteccion utilizando el metodo POST.</p>
+
+<p><img src="http://i.imgur.com/Yy4KK.png"></p>
+
+<p>Otras configuraciones mas restringidas incluyen el metodo POST como limite.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>AuthUserFile .htpasswd
+</span><span class='line'>AuthName "Area Radioactiva"
+</span><span class='line'>AuthType Basic
+</span><span class='line'> 
+</span><span class='line'>&lt;Limit GET POST>
+</span><span class='line'>require valid-user
+</span><span class='line'>&lt;/Limit></span></code></pre></td></tr></table></div></figure>
+
+
+<p>Pero eso no nos niega la posibilidad de enumerar los ficheros y directorios protegidos por .htaccess utilizando los demas metodos que se hayen habilitados en el servidor.</p>
+
+<p>Si analizamos, ahun existiendo o no el path /files/pass.txt, el servidor nos responderia con el mismo error 401 (no autorizado)</p>
+
+<p><img src="http://i.imgur.com/NG8WN.png"></p>
+
+<p>Lo mismo pasara al realizar una peticion POST, pero que hay de los demas metodos, como responderia ante una peticion http que no este dentro de los <Limit> ? por ejemplo TRACE.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>TRACE /files/pass.txt HTTP/1.0
+</span><span class='line'> 
+</span><span class='line'>HTTP/1.0 200 ok
+</span><span class='line'>Date: Thu, 05 Jul 2012 10:53:32 GTM
+</span><span class='line'>Server: Apache /2.2.3 (centOS)
+</span><span class='line'>Connection: close
+</span><span class='line'>Content-type: message/http
+</span><span class='line'>TRACE /files/pass.txt HTTP/1.0</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Evidentemente nos responde con 200 ok, hemos logrado evadir la restriccion del .htaccess para deducir la existencia del fichero en el servidor, en caso de no existir el servidor nos responderia con un error 404.</p>
+
+<p>Otro manera seria realizar peticiones con metodos no implementados e inexistentes como GETS, el servidor lo tomaria como si se tratara de un metodo GET.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>GETS /files/pass.txt HTTP/1.1
+</span><span class='line'> 
+</span><span class='line'>HTTP/1.0 200 ok
+</span><span class='line'>Date: Thu, 05 Jul 2012 10:53:32 GTM
+</span><span class='line'>Server: Apache /2.2.3 (centOS)
+</span><span class='line'>Connection: close
+</span><span class='line'>Content-type: message/http</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Este tipo de evaciones lo implementa la herramientas HTexploit.</p>
+
+<p><img src="http://i.imgur.com/qsBVV.png"></p>
+
+<p>Saludos!</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">q3rv0</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2014-11-17T09:27:30+06:30'><span class='date'><span class='date-month'>Nov</span> <span class='date-day'>17</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>9:27 am</span></time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://q3rv0.github.io/blog/2014/11/17/jugando-con-htaccess/" data-via="q3rv0" data-counturl="http://q3rv0.github.io/blog/2014/11/17/jugando-con-htaccess/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/11/17/tecnicas-de-blind-mysql-injection/" title="Previous Post: Tecnicas de Blind Mysql Injection">&laquo; Tecnicas de Blind Mysql Injection</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/11/17/xss-a-travez-de-error/" title="Next Post: xss a travez de error">xss a travez de error &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/11/17/blind-mysqli-time-based-teoria/">Blind Mysqli Time Based [Teoria]</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/17/sqli-plus-mod-security-bypass/">SQLI+Mod_Security Bypass</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/17/kbeast-plantando-un-rootkit/">[KBEAST] Plantando Un Rootkit</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/17/remote-code-execution/">Remote Code Execution</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/17/xss-a-travez-de-error/">Xss a Travez De Error</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - q3rv0 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
