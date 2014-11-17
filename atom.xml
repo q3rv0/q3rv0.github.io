@@ -1,50 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[My Octopress Blog]]></title>
+  <title><![CDATA[Security]]></title>
   <link href="http://q3rv0.github.io/atom.xml" rel="self"/>
   <link href="http://q3rv0.github.io/"/>
-  <updated>2014-11-17T00:16:48+06:30</updated>
+  <updated>2014-11-17T08:07:05+06:30</updated>
   <id>http://q3rv0.github.io/</id>
   <author>
-    <name><![CDATA[Your Name]]></name>
+    <name><![CDATA[q3rv0]]></name>
     
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
-  
-  <entry>
-    <title type="html"><![CDATA[Hola Mundo]]></title>
-    <link href="http://q3rv0.github.io/blog/2014/11/17/hola-mundo/"/>
-    <updated>2014-11-17T02:28:06+06:30</updated>
-    <id>http://q3rv0.github.io/blog/2014/11/17/hola-mundo</id>
-    <content type="html"><![CDATA[
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Prueba Code]]></title>
-    <link href="http://q3rv0.github.io/blog/2014/11/17/prueba-code/"/>
-    <updated>2014-11-17T00:09:14+06:30</updated>
-    <id>http://q3rv0.github.io/blog/2014/11/17/prueba-code</id>
-    <content type="html"><![CDATA[<p>probandooo!</p>
-
-<!--more-->
-
-
-<p>Prueba de codeblock</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='py'><span class='line'><span class="c">#!/usr/bin/env python</span>
-</span><span class='line'><span class="k">print</span> <span class="s">&quot;hola mundo&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>prueba de imagen</p>
-
-<p><img src="http://www.scrt.ch/images/content/insomnihack/insomnihack12_affiche.jpg"></p>
-]]></content>
-  </entry>
   
 </feed>
