@@ -1,0 +1,383 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Desbordando El Buffer en Linux X86 (I) - Security</title>
+  <meta name="author" content="q3rv0">
+
+  
+  <meta name="description" content="Cada vez que corremos un proceso en la maquina, se crea una memoria virtual para dicho proceso, ese segmento se divide en 3 partes, el texto, los &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://q3rv0.github.io/blog/2014/11/23/desbordando-el-buffer-en-linux-x86-i">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Security" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Security</a></h1>
+  
+    <h2>Follow the white rabbit&#8230;.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:q3rv0.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Desbordando El Buffer en Linux X86 (I)</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2014-11-23T04:01:07+06:30'><span class='date'><span class='date-month'>Nov</span> <span class='date-day'>23</span><span class='date-suffix'>rd</span>, <span class='date-year'>2014</span></span> <span class='time'>4:01 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>Cada vez que corremos un proceso en la maquina, se crea una memoria virtual para dicho proceso, ese segmento se divide en 3 partes, el texto, los datos y por ultimo el stack<!--more-->, que es donde nos vamos a concentrar para realizar la explotacion de este tipo de vulnerabilidad.</p>
+
+<p>Que es el stack?</p>
+
+<p>El stack es un segmento en la memoria que se encarga de almacenar datos y a su vez recuperarlos, administra la informacion en modo LIFO (last in first out), quiere decir que el ultimo dato en entrar es el primero en salir, un ejemplo mas sencillo seria comparar el stack con una pila de cd’s, en el que el primer cd hace de base de la pila y para llegar a el hay que retirar uno por uno los que se encuentran encima. Entonces cada vez que se ingresa un dato al stack se utiliza una instruccion denominada PUSH y cuando se retira un dato se llama a la instruccion POP, algo similar a un array.
+Los registros del procesador.</p>
+
+<p>El procesador cuenta con varios registros que cumplen diversas tareas en el stack, por el momento solo voy a mencionar a 3 de ellos.</p>
+
+<p>EIP – Registro que almacena la direccion de memoria de la proxima funcion que se va a ejecutar.</p>
+
+<p>ESP – Apunta a la parte superior del stack</p>
+
+<p>EBP – Aputa a la base del stack
+Ahora que ya se explicaron algunos conceptos basicos sobre el tema, vayamos al nudo del tutorial.
+Que es un Buffer overflow?</p>
+
+<p>Empezemos por definir que es un buffer, no es mas que un espacio de memoria en donde se vuelcan datos para determinada accion por ejemplo, tengo el siguiente programa en c.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="cp">#include &lt;stdlib.h&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;stdio.h&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;string.h&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">argv</span><span class="p">[])</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kt">char</span> <span class="n">buffer</span><span class="p">[</span><span class="mi">10</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">strcpy</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">printf</span><span class="p">(</span><span class="n">buffer</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Donde se define un buffer de 10 bytes, luego se lo pasa a la funcion strcpy que almacena en el buffer el argumento insertado por el usuario, esta misma no se encarga de controlar el tamaño limite del buffer por lo tanto si se introduce una mayor cantidad de caracteres,  el espacio desbordara y comenzara a sobrescribir los registros de memoria cercanos al buffer.</p>
+
+<p>Antes que nada, vamos a desactivar ASLR</p>
+
+<p>ASLR en criollo es un sistema de seguridad que vuelve aleatoria las direcciones de la memoria virtual.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nb">echo </span><span class="m">0</span> &gt; /proc/sys/kernel/randomize_va_space
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>y compilaremos el prog con los siguientes flag de gcc.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>gcc -ggdb -fno-stack-protector -mpreferred-stack-boundary<span class="o">=</span><span class="m">2</span> -o prog prog.c
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Para quitarle algunas protecciones al stack que le agrega gcc al compilar.</p>
+
+<p>Probemos pasandole mas de 10 caracteres al programa.</p>
+
+<p><img src="http://i.imgur.com/beDd3zp.png?1"></p>
+
+<p>Como se ve el programa crashea, veamos que pasa por dentro con gdb.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>gdb prog</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Le pasamos los argumentos</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>run AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</span></code></pre></td></tr></table></div></figure>
+
+
+<p>y una vez que el prog nos patee miramos en los registros a ver que encontramos?</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>info registers</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="http://i.imgur.com/euFxWOT.png?1"></p>
+
+<p>Como se ve en la imagen, se sobrescribieron dos registros como EIP y EBP con x41, que representa el caracter A en hex.</p>
+
+<p>Ahora por que crashea?, como explique anteriormente, el registro EIP contenia la direccion  de la proxima funcion a ejecutar, pero al ser sobreescrito con 4 A’s, EIP termina apuntando a una direccion invalida.</p>
+
+<p>Sabiendo que podemos inyectar en EIP, podriamos controlar el flujo del programa y mandarlo a la direccion que se nos ocurra.
+Controlando el flujo de ejecucion.</p>
+
+<p>Vamos con otro ejemplo pero un poco mas divertido.</p>
+
+<p>Le agregue la funcion owned() al programa anterior, que lo unico que hace es imprimir un texto.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="cp">#include &lt;stdlib.h&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;stdio.h&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;string.h&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">void</span> <span class="nf">owned</span><span class="p">(){</span>
+</span><span class='line'>    <span class="n">printf</span><span class="p">(</span><span class="s">&quot;Owned :)&quot;</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">argv</span><span class="p">[])</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kt">char</span> <span class="n">buffer</span><span class="p">[</span><span class="mi">10</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">strcpy</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">printf</span><span class="p">(</span><span class="n">buffer</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Pero no vamos a llamarla en el code, sino que vamos a inyectarle la direccion de memoria de owned() al EIP para asi alterar la salida del prog.</p>
+
+<p>compilamos y abrimos con gdb.</p>
+
+<p>Ahora tenemos que saber el punto exacto donde empieza a sobrescribirse EIP.</p>
+
+<p>Le pasamos 14 A’s – nada</p>
+
+<p>Le pasamos 15 A’s y se puede ver como empieza a infectarse el EIP</p>
+
+<p><img src="http://i.imgur.com/7M8OvfU.png?1"></p>
+
+<p>Como una direccion de memoria esta compuesta por 4 bytes le sumamos 3 y tenemos el EIP bien pintado con 18 A’s.</p>
+
+<p><img src="http://i.imgur.com/bvB7Qoy.png?2"></p>
+
+<p>Ahora solo nos queda averiguar la direccion donde la funcion owned() comienza a ser pusheada al stack, para esto vamos a desensamblarla</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>disas owned</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="http://i.imgur.com/7KrlqNN.png?1"></p>
+
+<p>Se ven las instrucciones del codigo ensamblador, la primera linea comienza a pushear la funcion asi que usaremos esa direccion de memoria: 0x08048408</p>
+
+<p>Ahora que tenemos la direccion con la que editaremos el EIP, solo basta restar 4 A’s e incluirla.</p>
+
+<p>A*14 + 0x08048408</p>
+
+<p>Voy a utlizar python para realizar la inyeccion. como se ve, se utiliza el escape \x para codificar los datos.</p>
+
+<p><img src="http://i.imgur.com/OVUuV7o.png?1"></p>
+
+<p>Pero si miramos la direccion a donde apunta el EIP vemos que esta al revez, esto pasa por que los procesadores Intel utilizan el sistema little-endian por lo tanto tendremos que invertir la direccion antes de ingresarla.</p>
+
+<p><img src="http://i.imgur.com/vAT6OWw.png?1"></p>
+
+<p>Y ahora si logramos ver la salida de la funcion owned.</p>
+
+<p>Y si en vez de direccionar a una funcion, lograramos llegar hasta un shellcode alojado en la memoria?, eso se vera en el proximo tutorial, saludos!</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">q3rv0</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2014-11-23T04:01:07+06:30'><span class='date'><span class='date-month'>Nov</span> <span class='date-day'>23</span><span class='date-suffix'>rd</span>, <span class='date-year'>2014</span></span> <span class='time'>4:01 am</span></time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://q3rv0.github.io/blog/2014/11/23/desbordando-el-buffer-en-linux-x86-i/" data-via="q3rv0" data-counturl="http://q3rv0.github.io/blog/2014/11/23/desbordando-el-buffer-en-linux-x86-i/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/11/23/tomando-el-control-de-una-camara-axis-parte-i/" title="Previous Post: Tomando el control de una camara AXIS – Parte I">&laquo; Tomando el control de una camara AXIS – Parte I</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/11/23/desbordando-el-buffer-en-linux-x86-i/">Desbordando El Buffer en Linux X86 (I)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/23/tomando-el-control-de-una-camara-axis-parte-i/">Tomando El Control De Una Camara AXIS – Parte I</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/23/escribiendo-un-auxiliar-para-msf/">Escribiendo Un Auxiliar Para MSF</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/23/mysqli-eb-con-extractvalue/">MYSQLI EB Con Extractvalue()</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/23/lfi-plus-sqli-incluyendo-ficheros-a-travez-de-valores-enteros/">LFI+SQLI [Incluyendo Ficheros a Travez De Valores Enteros]</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - q3rv0 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

