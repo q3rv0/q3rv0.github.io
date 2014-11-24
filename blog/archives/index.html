@@ -9,9 +9,9 @@
   <meta name="author" content="q3rv0">
 
   
-  <meta name="description" content="Blog Archive 2014 Desbordando El Buffer en Linux X86 (I)
-Nov 23 2014 Tomando El Control De Una Camara AXIS – Parte I
-Nov 23 2014 Escribiendo Un &hellip;">
+  <meta name="description" content="Blog Archive 2014 Desbordando el buffer en linux x86 (III) [ASLR bypass]
+Nov 24 2014 Desbordando el buffer en linux x86 (II) [NOP Sled]
+Nov 24 2014 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -20,23 +20,23 @@ Nov 23 2014 Escribiendo Un &hellip;">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://q3rv0.github.io/blog/archives">
+  <link rel="canonical" href="http://q3rv0.github.io/blog/archives/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <link href="/atom.xml" rel="alternate" title="Security" type="application/atom+xml">
   <script src="/javascripts/modernizr-2.0.js"></script>
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/ender.js"></script>
   <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Security" type="application/atom+xml">
   <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
-<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
-<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=Arvo:400,400italic,700,700italic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=Playball" rel="stylesheet" type="text/css">
 
   
 
 </head>
 
-<body   >
+<body>
   <header role="banner"><hgroup>
   <h1><a href="/">Security</a></h1>
   
@@ -45,7 +45,8 @@ Nov 23 2014 Escribiendo Un &hellip;">
 </hgroup>
 
 </header>
-  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <div id="navigation">
+    <nav role="navigation"><ul class="subscription" data-subscription="rss">
   <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
   
 </ul>
@@ -63,9 +64,11 @@ Nov 23 2014 Escribiendo Un &hellip;">
 </ul>
 
 </nav>
-  <div id="main">
-    <div id="content">
-      <div>
+  </div>
+  <div id="body"  >
+    <div id="main">
+      <div id="content">
+        <div>
 <article role="article">
   
   <header>
@@ -82,7 +85,27 @@ Nov 23 2014 Escribiendo Un &hellip;">
 
 <article>
   
-<h1><a href="/blog/2014/11/23/desbordando-el-buffer-en-linux-x86-i/">Desbordando El Buffer en Linux X86 (I)</a></h1>
+<h1><a href="/blog/2014/11/24/desbordando-el-buffer-en-linux-x86-iii-aslr-bypass/">Desbordando el buffer en linux x86 (III) [ASLR bypass]</a></h1>
+<time datetime="2014-11-24T21:47:55+06:30" pubdate><span class='month'>Nov</span> <span class='day'>24</span> <span class='year'>2014</span></time>
+
+
+</article>
+
+
+
+<article>
+  
+<h1><a href="/blog/2014/11/24/desbordando-el-buffer-en-linux-x86-ii-nop-sled/">Desbordando el buffer en linux x86 (II) [NOP Sled]</a></h1>
+<time datetime="2014-11-24T21:32:57+06:30" pubdate><span class='month'>Nov</span> <span class='day'>24</span> <span class='year'>2014</span></time>
+
+
+</article>
+
+
+
+<article>
+  
+<h1><a href="/blog/2014/11/23/desbordando-el-buffer-en-linux-x86-i/">Desbordando el buffer en linux x86 (I)</a></h1>
 <time datetime="2014-11-23T04:01:07+06:30" pubdate><span class='month'>Nov</span> <span class='day'>23</span> <span class='year'>2014</span></time>
 
 
@@ -92,7 +115,7 @@ Nov 23 2014 Escribiendo Un &hellip;">
 
 <article>
   
-<h1><a href="/blog/2014/11/23/tomando-el-control-de-una-camara-axis-parte-i/">Tomando El Control De Una Camara AXIS – Parte I</a></h1>
+<h1><a href="/blog/2014/11/23/tomando-el-control-de-una-camara-axis-parte-i/">Tomando el control de una camara AXIS – Parte I</a></h1>
 <time datetime="2014-11-23T03:36:54+06:30" pubdate><span class='month'>Nov</span> <span class='day'>23</span> <span class='year'>2014</span></time>
 
 
@@ -102,7 +125,7 @@ Nov 23 2014 Escribiendo Un &hellip;">
 
 <article>
   
-<h1><a href="/blog/2014/11/23/escribiendo-un-auxiliar-para-msf/">Escribiendo Un Auxiliar Para MSF</a></h1>
+<h1><a href="/blog/2014/11/23/escribiendo-un-auxiliar-para-msf/">Escribiendo un auxiliar para MSF</a></h1>
 <time datetime="2014-11-23T03:20:10+06:30" pubdate><span class='month'>Nov</span> <span class='day'>23</span> <span class='year'>2014</span></time>
 
 
@@ -112,7 +135,7 @@ Nov 23 2014 Escribiendo Un &hellip;">
 
 <article>
   
-<h1><a href="/blog/2014/11/23/mysqli-eb-con-extractvalue/">MYSQLI EB Con Extractvalue()</a></h1>
+<h1><a href="/blog/2014/11/23/mysqli-eb-con-extractvalue/">MYSQLI EB con extractvalue()</a></h1>
 <time datetime="2014-11-23T03:06:05+06:30" pubdate><span class='month'>Nov</span> <span class='day'>23</span> <span class='year'>2014</span></time>
 
 
@@ -122,7 +145,7 @@ Nov 23 2014 Escribiendo Un &hellip;">
 
 <article>
   
-<h1><a href="/blog/2014/11/23/lfi-plus-sqli-incluyendo-ficheros-a-travez-de-valores-enteros/">LFI+SQLI [Incluyendo Ficheros a Travez De Valores Enteros]</a></h1>
+<h1><a href="/blog/2014/11/23/lfi-plus-sqli-incluyendo-ficheros-a-travez-de-valores-enteros/">LFI+SQLI [Incluyendo ficheros a travez de valores enteros]</a></h1>
 <time datetime="2014-11-23T02:15:42+06:30" pubdate><span class='month'>Nov</span> <span class='day'>23</span> <span class='year'>2014</span></time>
 
 
@@ -132,7 +155,7 @@ Nov 23 2014 Escribiendo Un &hellip;">
 
 <article>
   
-<h1><a href="/blog/2014/11/23/mysql-udf-injection-elevacion-de-privilegios/">Mysql UDF Injection [Elevacion De Privilegios]</a></h1>
+<h1><a href="/blog/2014/11/23/mysql-udf-injection-elevacion-de-privilegios/">Mysql UDF injection [Elevacion de privilegios]</a></h1>
 <time datetime="2014-11-23T01:28:36+06:30" pubdate><span class='month'>Nov</span> <span class='day'>23</span> <span class='year'>2014</span></time>
 
 
@@ -142,7 +165,7 @@ Nov 23 2014 Escribiendo Un &hellip;">
 
 <article>
   
-<h1><a href="/blog/2014/11/23/windows-os-evadiendo-las-disable-functions-en-php-con-com/">[Windows OS] Evadiendo Las Disable_functions en Php Con COM()</a></h1>
+<h1><a href="/blog/2014/11/23/windows-os-evadiendo-las-disable-functions-en-php-con-com/">[Windows OS] Evadiendo las disable_functions en php con COM()</a></h1>
 <time datetime="2014-11-23T01:17:59+06:30" pubdate><span class='month'>Nov</span> <span class='day'>23</span> <span class='year'>2014</span></time>
 
 
@@ -172,7 +195,7 @@ Nov 23 2014 Escribiendo Un &hellip;">
 
 <article>
   
-<h1><a href="/blog/2014/11/17/kbeast-plantando-un-rootkit/">[KBEAST] Plantando Un Rootkit</a></h1>
+<h1><a href="/blog/2014/11/17/kbeast-plantando-un-rootkit/">[KBEAST] Plantando un Rootkit</a></h1>
 <time datetime="2014-11-17T10:19:05+06:30" pubdate><span class='month'>Nov</span> <span class='day'>17</span> <span class='year'>2014</span></time>
 
 
@@ -182,7 +205,7 @@ Nov 23 2014 Escribiendo Un &hellip;">
 
 <article>
   
-<h1><a href="/blog/2014/11/17/remote-code-execution/">Remote Code Execution</a></h1>
+<h1><a href="/blog/2014/11/17/remote-code-execution/">remote code execution</a></h1>
 <time datetime="2014-11-17T10:04:38+06:30" pubdate><span class='month'>Nov</span> <span class='day'>17</span> <span class='year'>2014</span></time>
 
 
@@ -192,7 +215,7 @@ Nov 23 2014 Escribiendo Un &hellip;">
 
 <article>
   
-<h1><a href="/blog/2014/11/17/jugando-con-htaccess/">Jugando Con .htaccess</a></h1>
+<h1><a href="/blog/2014/11/17/jugando-con-htaccess/">jugando con .htaccess</a></h1>
 <time datetime="2014-11-17T09:27:30+06:30" pubdate><span class='month'>Nov</span> <span class='day'>17</span> <span class='year'>2014</span></time>
 
 
@@ -202,7 +225,7 @@ Nov 23 2014 Escribiendo Un &hellip;">
 
 <article>
   
-<h1><a href="/blog/2014/11/17/tecnicas-de-blind-mysql-injection/">Tecnicas De Blind Mysql Injection</a></h1>
+<h1><a href="/blog/2014/11/17/tecnicas-de-blind-mysql-injection/">Tecnicas de Blind Mysql Injection</a></h1>
 <time datetime="2014-11-17T08:41:03+06:30" pubdate><span class='month'>Nov</span> <span class='day'>17</span> <span class='year'>2014</span></time>
 
 
@@ -212,7 +235,7 @@ Nov 23 2014 Escribiendo Un &hellip;">
 
 <article>
   
-<h1><a href="/blog/2014/11/17/resultado-del-lampsecurity-ctf-6-challenge/">Resultado Del LAMPSecurity:CTF 6 Challenge</a></h1>
+<h1><a href="/blog/2014/11/17/resultado-del-lampsecurity-ctf-6-challenge/">Resultado del LAMPSecurity:CTF 6 Challenge</a></h1>
 <time datetime="2014-11-17T08:30:28+06:30" pubdate><span class='month'>Nov</span> <span class='day'>17</span> <span class='year'>2014</span></time>
 
 
@@ -232,7 +255,7 @@ Nov 23 2014 Escribiendo Un &hellip;">
 
 <article>
   
-<h1><a href="/blog/2014/11/17/backdoor-via-inyeccion/">Backdoor via Inyeccion</a></h1>
+<h1><a href="/blog/2014/11/17/backdoor-via-inyeccion/">Backdoor via inyeccion</a></h1>
 <time datetime="2014-11-17T08:19:41+06:30" pubdate><span class='month'>Nov</span> <span class='day'>17</span> <span class='year'>2014</span></time>
 
 
@@ -242,7 +265,7 @@ Nov 23 2014 Escribiendo Un &hellip;">
 
 <article>
   
-<h1><a href="/blog/2014/11/17/sqli-file-inclusion/">Sqli File Inclusion</a></h1>
+<h1><a href="/blog/2014/11/17/sqli-file-inclusion/">Sqli file inclusion</a></h1>
 <time datetime="2014-11-17T08:12:34+06:30" pubdate><span class='month'>Nov</span> <span class='day'>17</span> <span class='year'>2014</span></time>
 
 
@@ -262,23 +285,23 @@ Nov 23 2014 Escribiendo Un &hellip;">
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2014/11/23/desbordando-el-buffer-en-linux-x86-i/">Desbordando El Buffer en Linux X86 (I)</a>
+        <a href="/blog/2014/11/24/desbordando-el-buffer-en-linux-x86-iii-aslr-bypass/">Desbordando el buffer en linux x86 (III) [ASLR bypass]</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/11/23/tomando-el-control-de-una-camara-axis-parte-i/">Tomando El Control De Una Camara AXIS – Parte I</a>
+        <a href="/blog/2014/11/24/desbordando-el-buffer-en-linux-x86-ii-nop-sled/">Desbordando el buffer en linux x86 (II) [NOP Sled]</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/11/23/escribiendo-un-auxiliar-para-msf/">Escribiendo Un Auxiliar Para MSF</a>
+        <a href="/blog/2014/11/23/desbordando-el-buffer-en-linux-x86-i/">Desbordando el buffer en linux x86 (I)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/11/23/mysqli-eb-con-extractvalue/">MYSQLI EB Con Extractvalue()</a>
+        <a href="/blog/2014/11/23/tomando-el-control-de-una-camara-axis-parte-i/">Tomando el control de una camara AXIS – Parte I</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/11/23/lfi-plus-sqli-incluyendo-ficheros-a-travez-de-valores-enteros/">LFI+SQLI [Incluyendo Ficheros a Travez De Valores Enteros]</a>
+        <a href="/blog/2014/11/23/escribiendo-un-auxiliar-para-msf/">Escribiendo un auxiliar para MSF</a>
       </li>
     
   </ul>
@@ -292,15 +315,15 @@ Nov 23 2014 Escribiendo Un &hellip;">
 </aside>
 
 
+      </div>
     </div>
-  </div>
-  <footer role="contentinfo"><p>
+    <footer role="contentinfo"><p>
   Copyright &copy; 2014 - q3rv0 -
-  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a>. Design by <a href="http://octopressthemes.com">Octopress Themes</a></span>
 </p>
 
 </footer>
-  
+    
 
 
 
@@ -313,7 +336,7 @@ Nov 23 2014 Escribiendo Un &hellip;">
       var twitterWidgets = document.createElement('script');
       twitterWidgets.type = 'text/javascript';
       twitterWidgets.async = true;
-      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
       document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
     })();
   </script>
@@ -322,5 +345,6 @@ Nov 23 2014 Escribiendo Un &hellip;">
 
 
 
+  </div>
 </body>
 </html>

