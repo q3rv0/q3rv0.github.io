@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>admins&#8230;admins&#8230; - q3rv0</title>
+  <title>Backdoor via inyeccion - q3rv0</title>
   <meta name="author" content="q3rv0">
 
   
-  <meta name="description" content="Siempre antes de realizar un análisis de puertos y servicios en el servidor, siempre antes que revisar cualquier punto de ataque, estoy acostumbrado &hellip;">
+  <meta name="description" content="Cuando se trata de vulnerabilidades de inyeccion de codigo tengo que decir que me encanta, hoy le traigo una manera de conseguir un backdoor en el &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://q3rv0.github.io/blog/2014/11/17/admins-dot-dot-dot-admins-dot-dot-dot/">
+  <link rel="canonical" href="http://q3rv0.github.io/blog/2014/11/16/backdoor-via-inyeccion/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <script src="/javascripts/modernizr-2.0.js"></script>
@@ -71,7 +71,7 @@
   
   <header>
     
-      <h1 class="entry-title">admins&#8230;admins&#8230;</h1>
+      <h1 class="entry-title">Backdoor via Inyeccion</h1>
     
     
       <p class="meta">
@@ -87,37 +87,24 @@
   
 
 
-<time datetime="2014-11-17T08:25:26+06:30" pubdate data-updated="true"></time>
+<time datetime="2014-11-16T22:49:41-03:00" pubdate data-updated="true"></time>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><p>Siempre antes de realizar un análisis de puertos y servicios en el servidor, siempre antes que revisar cualquier punto de ataque, estoy acostumbrado a indagar sobre los distintos tipos de archivos que pueda albergar la aplicación en la zona pública: <em>.xls, </em>.sql, <em>docx, </em>.txt, <em>.jsp, </em>.php, etc.<!--more--></p>
+<div class="entry-content"><p>Cuando se trata de vulnerabilidades de inyeccion de codigo tengo que decir que me encanta, hoy le traigo una manera de conseguir un backdoor en el servidor a travez de una de estas. hay veces que se logra realizar inyecciones de manera satisfactoria dumpeando datos de passwords en texto plano o encriptadas, pero si el<!--more-->panel del administrador esta desabilitado
+u no se logra romper el hash o cualquier situacion negativa que
+haga que esa informacion no sirva para nada, entonces que
+hacemos?</p>
 
-<p>Hay ciertas ocaciones en las que uno se encuentra con este tipo de cosas…</p>
+<p>Aca dejo un documento que escribi en la tarde, donde se muestra como inyectar codigo php remotamente, a travez de una sqli.</p>
 
-<p><img src="http://i.imgur.com/JGX89.png"></p>
+<iframe src="http://www.slideshare.net/slideshow/embed_code/12581123 " width="595" height="446" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC;border-width:1px 1px 0;margin-bottom:5px" allowfullscreen></iframe>
 
-<p>WTF!!? además de que los passwords están en texto plano!, estás son las cosas por las que me preguntó ¿por que hay cada admin tan pelotudo?
-Rápidamente me hago con el phpmyadmin</p>
 
-<p><img src="http://i.imgur.com/RzSxb.png"></p>
-
-<p>Y viendo los nombres de las tablas deduzco que se trata de una aplicación que utiliza un CMS wordpress, tranquilamente podría subir una shell desde aquí pero mi intención es secuestrar el WP así que edito la tabla wp_users para cambiar el hash del admin por otro generado a mi antojo, listo ya  estoy dentro del panel.</p>
-
-<p><img src="http://i.imgur.com/fR9eo.png"></p>
-
-<p>Debido a las restricciones de subida, además de no poder realizar un bypass, opto por editar uno de los ficheros del theme comments.php para insertar un upload</p>
-
-<p><img src="http://i.imgur.com/hSkne.png"></p>
-
-<p><img src="http://i.imgur.com/jKggP.png"></p>
-
-<p><img src="http://i.imgur.com/Gm600.png"></p>
-
-<p>Subo la shell y ahora solo me queda realizar un análisis de post explotación en el Debian 5.0 y encontrar alguna manera de elevar privilegios.</p>
+<p></p>
 </div>
 
 
@@ -140,7 +127,7 @@ Rápidamente me hago con el phpmyadmin</p>
   
 
 
-<time datetime="2014-11-17T08:25:26+06:30" pubdate data-updated="true"></time>
+<time datetime="2014-11-16T22:49:41-03:00" pubdate data-updated="true"></time>
       
 
 
@@ -148,7 +135,7 @@ Rápidamente me hago con el phpmyadmin</p>
     
       <div class="sharing">
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://q3rv0.github.io/blog/2014/11/17/admins-dot-dot-dot-admins-dot-dot-dot/" data-via="q3rv0" data-counturl="http://q3rv0.github.io/blog/2014/11/17/admins-dot-dot-dot-admins-dot-dot-dot/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://q3rv0.github.io/blog/2014/11/16/backdoor-via-inyeccion/" data-via="q3rv0" data-counturl="http://q3rv0.github.io/blog/2014/11/16/backdoor-via-inyeccion/" >Tweet</a>
   
   
   
@@ -157,10 +144,10 @@ Rápidamente me hago con el phpmyadmin</p>
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2014/11/17/backdoor-via-inyeccion/" title="Previous Post: Backdoor via inyeccion">&laquo; Backdoor via inyeccion</a>
+        <a class="basic-alignment left" href="/blog/2014/11/16/sqli-file-inclusion/" title="Previous Post: Sqli file inclusion">&laquo; Sqli file inclusion</a>
       
       
-        <a class="basic-alignment right" href="/blog/2014/11/17/resultado-del-lampsecurity-ctf-6-challenge/" title="Next Post: Resultado del LAMPSecurity:CTF 6 Challenge">Resultado del LAMPSecurity:CTF 6 Challenge &raquo;</a>
+        <a class="basic-alignment right" href="/blog/2014/11/16/admins-dot-dot-dot-admins-dot-dot-dot/" title="Next Post: admins...admins...">admins&#8230;admins&#8230; &raquo;</a>
       
     </p>
   </footer>
@@ -175,7 +162,7 @@ Rápidamente me hago con el phpmyadmin</p>
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2014/12/15/del-spam-a-la-intrusion/">Del spam a la intrusion</a>
+        <a href="/blog/2014/12/14/del-spam-a-la-intrusion/">Del spam a la intrusion</a>
       </li>
     
       <li class="post">
@@ -187,11 +174,11 @@ Rápidamente me hago con el phpmyadmin</p>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/11/23/desbordando-el-buffer-en-linux-x86-i/">Desbordando el buffer en linux x86 (I)</a>
+        <a href="/blog/2014/11/22/desbordando-el-buffer-en-linux-x86-i/">Desbordando el buffer en linux x86 (I)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/11/23/tomando-el-control-de-una-camara-axis-parte-i/">Tomando el control de una camara AXIS – Parte I</a>
+        <a href="/blog/2014/11/22/tomando-el-control-de-una-camara-axis-parte-i/">Tomando el control de una camara AXIS – Parte I</a>
       </li>
     
   </ul>
@@ -208,7 +195,7 @@ Rápidamente me hago con el phpmyadmin</p>
       </div>
     </div>
     <footer role="contentinfo"><p>
-  Copyright &copy; 2014 - q3rv0 -
+  Copyright &copy; 2015 - q3rv0 -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a>. Design by <a href="http://octopressthemes.com">Octopress Themes</a></span>
 </p>
 

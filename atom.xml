@@ -4,7 +4,7 @@
   <title><![CDATA[q3rv0]]></title>
   <link href="http://q3rv0.github.io/atom.xml" rel="self"/>
   <link href="http://q3rv0.github.io/"/>
-  <updated>2014-12-17T22:08:05+06:30</updated>
+  <updated>2015-01-11T19:34:14-03:00</updated>
   <id>http://q3rv0.github.io/</id>
   <author>
     <name><![CDATA[q3rv0]]></name>
@@ -15,16 +15,16 @@
   
   <entry>
     <title type="html"><![CDATA[Del spam a la intrusion]]></title>
-    <link href="http://q3rv0.github.io/blog/2014/12/15/del-spam-a-la-intrusion/"/>
-    <updated>2014-12-15T00:33:48+06:30</updated>
-    <id>http://q3rv0.github.io/blog/2014/12/15/del-spam-a-la-intrusion</id>
+    <link href="http://q3rv0.github.io/blog/2014/12/14/del-spam-a-la-intrusion/"/>
+    <updated>2014-12-14T15:03:48-03:00</updated>
+    <id>http://q3rv0.github.io/blog/2014/12/14/del-spam-a-la-intrusion</id>
     <content type="html"><![CDATA[<p>Prologo</p>
 
 <p>Hacia rato que no le echaba una ojeada al spam de mi gmail y esta vez tenia el basurin lleno, es que muchas veces uno puede encontrarse envuelto en alguna aventurita que te alegre el dia o no, en este caso mas que nada fue un poco de diversion. En fin, mientras leia los subject de los correos me pare en uno que decia: &ldquo;Your account has ben blocked&rdquo;.<!--more--></p>
 
 <p><img src="http://i.imgur.com/pZT4QvO.png"></p>
 
-<p>Era un mail &ldquo;supuestamente&rdquo; eviando desde blockchain, pero como no tenia idea que servicio estaba prestando al publico me fui directamente a la url del sitio.</p>
+<p>Era un mail &ldquo;supuestamente&rdquo; eviado desde blockchain, pero como no tenia idea que servicio estaba prestando al publico me fui directamente a la url del sitio.</p>
 
 <p><a href="https://blockchain.info/">https://blockchain.info/</a></p>
 
@@ -291,7 +291,7 @@
   <entry>
     <title type="html"><![CDATA[Desbordando el buffer en linux x86 (III) [ASLR bypass]]]></title>
     <link href="http://q3rv0.github.io/blog/2014/11/24/desbordando-el-buffer-en-linux-x86-iii-aslr-bypass/"/>
-    <updated>2014-11-24T21:47:55+06:30</updated>
+    <updated>2014-11-24T12:17:55-03:00</updated>
     <id>http://q3rv0.github.io/blog/2014/11/24/desbordando-el-buffer-en-linux-x86-iii-aslr-bypass</id>
     <content type="html"><![CDATA[<p>Esta es la tercera  parte de una serie de tutoriales para aprender a explotar el buffer en sistemas Linux x86. En el anterior apartado se logro encastrar codigo ejecutable y obtener una shell, pero para lograrlo debimos desactivar previamente ASLR.  Como explique anteriormente este sistema de seguridad nos dificulta un<!--more--> poco las cosas randomizando la memoria.</p>
 
@@ -441,7 +441,7 @@
   <entry>
     <title type="html"><![CDATA[Desbordando el buffer en linux x86 (II) [NOP Sled]]]></title>
     <link href="http://q3rv0.github.io/blog/2014/11/24/desbordando-el-buffer-en-linux-x86-ii-nop-sled/"/>
-    <updated>2014-11-24T21:32:57+06:30</updated>
+    <updated>2014-11-24T12:02:57-03:00</updated>
     <id>http://q3rv0.github.io/blog/2014/11/24/desbordando-el-buffer-en-linux-x86-ii-nop-sled</id>
     <content type="html"><![CDATA[<p>En el anterior post se hizo una pequeña introduccion al funcionamiento del stack y a los registros del procesador, ademas se logro modificar el flujo<!--more--> de datos de un programa para que atente a una funcion que no habia sido llamada.</p>
 
@@ -555,9 +555,9 @@ Ahora solamente tenenemos que buscar/generar un shellcode acorde a nuestra arqui
   
   <entry>
     <title type="html"><![CDATA[Desbordando el buffer en linux x86 (I)]]></title>
-    <link href="http://q3rv0.github.io/blog/2014/11/23/desbordando-el-buffer-en-linux-x86-i/"/>
-    <updated>2014-11-23T04:01:07+06:30</updated>
-    <id>http://q3rv0.github.io/blog/2014/11/23/desbordando-el-buffer-en-linux-x86-i</id>
+    <link href="http://q3rv0.github.io/blog/2014/11/22/desbordando-el-buffer-en-linux-x86-i/"/>
+    <updated>2014-11-22T18:31:07-03:00</updated>
+    <id>http://q3rv0.github.io/blog/2014/11/22/desbordando-el-buffer-en-linux-x86-i</id>
     <content type="html"><![CDATA[<p>Cada vez que corremos un proceso en la maquina, se crea una memoria virtual para dicho proceso, ese segmento se divide en 3 partes, el texto, los datos y por ultimo el stack<!--more-->, que es donde nos vamos a concentrar para realizar la explotacion de este tipo de vulnerabilidad.</p>
 
 <p>Que es el stack?</p>
@@ -750,9 +750,9 @@ Controlando el flujo de ejecucion.</p>
   
   <entry>
     <title type="html"><![CDATA[Tomando el control de una camara AXIS – Parte I]]></title>
-    <link href="http://q3rv0.github.io/blog/2014/11/23/tomando-el-control-de-una-camara-axis-parte-i/"/>
-    <updated>2014-11-23T03:36:54+06:30</updated>
-    <id>http://q3rv0.github.io/blog/2014/11/23/tomando-el-control-de-una-camara-axis-parte-i</id>
+    <link href="http://q3rv0.github.io/blog/2014/11/22/tomando-el-control-de-una-camara-axis-parte-i/"/>
+    <updated>2014-11-22T18:06:54-03:00</updated>
+    <id>http://q3rv0.github.io/blog/2014/11/22/tomando-el-control-de-una-camara-axis-parte-i</id>
     <content type="html"><![CDATA[<p>Hay veces en las que se me da por jugar con Shodan, realizando busqueda de routers, camaras IP u otros dispositivos, esta vez me puse a indagar las camaras AXIS que se encontraban en la red publica.</p>
 
 <p>Simplemente poniedon AXIS en el buscador podemos encontrar unas cuantas disponibles,<!--more--> sin embargo la gran mayoria dispone de  autentificacion HTTP Digest para acceder al panel (pero no todas) incluso muchas poseen passwords como el clasico 123456.</p>
@@ -998,9 +998,9 @@ Controlando el flujo de ejecucion.</p>
   
   <entry>
     <title type="html"><![CDATA[Escribiendo un auxiliar para MSF]]></title>
-    <link href="http://q3rv0.github.io/blog/2014/11/23/escribiendo-un-auxiliar-para-msf/"/>
-    <updated>2014-11-23T03:20:10+06:30</updated>
-    <id>http://q3rv0.github.io/blog/2014/11/23/escribiendo-un-auxiliar-para-msf</id>
+    <link href="http://q3rv0.github.io/blog/2014/11/22/escribiendo-un-auxiliar-para-msf/"/>
+    <updated>2014-11-22T17:50:10-03:00</updated>
+    <id>http://q3rv0.github.io/blog/2014/11/22/escribiendo-un-auxiliar-para-msf</id>
     <content type="html"><![CDATA[<p><img src="http://i.imgur.com/boJZ1iI.jpg"></p>
 
 <p>La idea de comenzar a aprender ruby llego solo por el echo de poder ver en la consola del msf un auxiliar escrito por mi, la API de metasploit no es un muy complicadad de llevar y con solo unos dias de practica, y es mas, ya estando familiarizados con otros lenguajes similares como lo son python y perl la forma de tomar el control de ruby se hace mas llevadera que comenzar desde cero, <!--more-->por suspuesto no estoy diciendo que sean realmente identicos pero ambos lenguajes poseen ciertas caracteristicas como la sencilles de su sintaxis, entre otras.</p>
@@ -1541,9 +1541,9 @@ Controlando el flujo de ejecucion.</p>
   
   <entry>
     <title type="html"><![CDATA[MYSQLI EB con extractvalue()]]></title>
-    <link href="http://q3rv0.github.io/blog/2014/11/23/mysqli-eb-con-extractvalue/"/>
-    <updated>2014-11-23T03:06:05+06:30</updated>
-    <id>http://q3rv0.github.io/blog/2014/11/23/mysqli-eb-con-extractvalue</id>
+    <link href="http://q3rv0.github.io/blog/2014/11/22/mysqli-eb-con-extractvalue/"/>
+    <updated>2014-11-22T17:36:05-03:00</updated>
+    <id>http://q3rv0.github.io/blog/2014/11/22/mysqli-eb-con-extractvalue</id>
     <content type="html"><![CDATA[<p>Quien conozca de inyecciones sabe bien que para explotar una mysqli error based  es necesario utitlizar las funciones floor() y rand() .</p>
 
 <p><img src="http://i.imgur.com/SjsNAze.png?1"></p>
@@ -1623,9 +1623,9 @@ Controlando el flujo de ejecucion.</p>
   
   <entry>
     <title type="html"><![CDATA[LFI+SQLI [Incluyendo ficheros a travez de valores enteros]]]></title>
-    <link href="http://q3rv0.github.io/blog/2014/11/23/lfi-plus-sqli-incluyendo-ficheros-a-travez-de-valores-enteros/"/>
-    <updated>2014-11-23T02:15:42+06:30</updated>
-    <id>http://q3rv0.github.io/blog/2014/11/23/lfi-plus-sqli-incluyendo-ficheros-a-travez-de-valores-enteros</id>
+    <link href="http://q3rv0.github.io/blog/2014/11/22/lfi-plus-sqli-incluyendo-ficheros-a-travez-de-valores-enteros/"/>
+    <updated>2014-11-22T16:45:42-03:00</updated>
+    <id>http://q3rv0.github.io/blog/2014/11/22/lfi-plus-sqli-incluyendo-ficheros-a-travez-de-valores-enteros</id>
     <content type="html"><![CDATA[<p>No es necesario que un parametro trabaje con valores tipo “string” para incluir ficheros localmente, hay ciertos parametros que trabajan con funciones como include(), require(), <!--more-->etc pero lo hacen por medio de un valor entero,por ejemplo:</p>
 
 <p>Tenemos la siguiente url:</p>
@@ -1671,9 +1671,9 @@ Controlando el flujo de ejecucion.</p>
   
   <entry>
     <title type="html"><![CDATA[Mysql UDF injection [Elevacion de privilegios]]]></title>
-    <link href="http://q3rv0.github.io/blog/2014/11/23/mysql-udf-injection-elevacion-de-privilegios/"/>
-    <updated>2014-11-23T01:28:36+06:30</updated>
-    <id>http://q3rv0.github.io/blog/2014/11/23/mysql-udf-injection-elevacion-de-privilegios</id>
+    <link href="http://q3rv0.github.io/blog/2014/11/22/mysql-udf-injection-elevacion-de-privilegios/"/>
+    <updated>2014-11-22T15:58:36-03:00</updated>
+    <id>http://q3rv0.github.io/blog/2014/11/22/mysql-udf-injection-elevacion-de-privilegios</id>
     <content type="html"><![CDATA[<p>Una linda manera de elevar privilegios en un sistema comprometido es aprovechando los permisos con los que corren ciertos demonios en el sistema como el servidor mysql.
 Hay dos formas de añadir funciones a Mysql y una de ellas es a travez de la interface UDF (funciones definidas por el usuario) para esto habra que contar con la libreria necesaria apartir de la cual seran llamadas. Teniendo los privilegios necesarios podremos crear ciertas funciones como sys_eval() la cual nos permitiran ejecutar comandos como usuario root desde la propia db.</p>
 
@@ -1776,9 +1776,9 @@ Hay dos formas de añadir funciones a Mysql y una de ellas es a travez de la int
   
   <entry>
     <title type="html"><![CDATA[[Windows OS] Evadiendo las disable_functions en php con COM()]]></title>
-    <link href="http://q3rv0.github.io/blog/2014/11/23/windows-os-evadiendo-las-disable-functions-en-php-con-com/"/>
-    <updated>2014-11-23T01:17:59+06:30</updated>
-    <id>http://q3rv0.github.io/blog/2014/11/23/windows-os-evadiendo-las-disable-functions-en-php-con-com</id>
+    <link href="http://q3rv0.github.io/blog/2014/11/22/windows-os-evadiendo-las-disable-functions-en-php-con-com/"/>
+    <updated>2014-11-22T15:47:59-03:00</updated>
+    <id>http://q3rv0.github.io/blog/2014/11/22/windows-os-evadiendo-las-disable-functions-en-php-con-com</id>
     <content type="html"><![CDATA[<p>Escribo este mini post, para hablar sobre el tema de evacion de ejecucion de comandos en servidores Windows, es que hace poquito subi una webshell a un Windows NT, y me encontre con las siguientes funciones denegadas:</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
@@ -1884,7 +1884,7 @@ Hay dos formas de añadir funciones a Mysql y una de ellas es a travez de la int
   <entry>
     <title type="html"><![CDATA[Blind Mysqli Time Based [Teoria]]]></title>
     <link href="http://q3rv0.github.io/blog/2014/11/17/blind-mysqli-time-based-teoria/"/>
-    <updated>2014-11-17T10:42:51+06:30</updated>
+    <updated>2014-11-17T01:12:51-03:00</updated>
     <id>http://q3rv0.github.io/blog/2014/11/17/blind-mysqli-time-based-teoria</id>
     <content type="html"><![CDATA[<p>Mientras “auditaba” una web, lo digo entre comillas por que no me dedico a eso en lo laboral, mas bien me encontraba tratando de ingresar a un sitio por cuestiones personales, me encontre con una variante de inyeccion sql dando por descartado las demas a travez de las respuestas que generaba el servidor, una “Blind mysqli basada en tiempo”,<!--more--> paso a explicar a quienes no se encuntren familiarizados con este tipo de inyeccion.
 Basicamente una “Blind mysqli basada en tiempo” se trata de inyectar a ciegas como toda blind, en mi caso utilizando la tecnica de busqueda binaria (la mas comunmente utilizada en estas situaciones) pero se da cuando la aplicacion muestra el mismo mensaje TRUE OR FALSE, es decir que da los mismo inyectar un OR 1=1 que un OR 2+5/87=9999999999 el sitio web nos seguira mostrando el mismo mensaje de error, o puede deberse a realizar una carga incorrecta del contenido web, o cualquier otra desvariacion en el sitio, da lo mismo la aplicacion resulta vulnerable pero no podremos deducir cual es la inyeccion correcta.
@@ -1999,7 +1999,7 @@ Para estas situaciones, podemos hacer uso de la funcion sleep() y la estructura 
   <entry>
     <title type="html"><![CDATA[SQLI+Mod_Security Bypass]]></title>
     <link href="http://q3rv0.github.io/blog/2014/11/17/sqli-plus-mod-security-bypass/"/>
-    <updated>2014-11-17T10:37:16+06:30</updated>
+    <updated>2014-11-17T01:07:16-03:00</updated>
     <id>http://q3rv0.github.io/blog/2014/11/17/sqli-plus-mod-security-bypass</id>
     <content type="html"><![CDATA[<p>Indagando en busca de vulnerabilidades, me cruzo con un input mal validado el cual esta siendo filtrado por un WAF, posiblemente Mod_security, bastante mal configurado, en el video se puede ver como realize una simple evacion de este a <!--more-->travez de /<em>!</em>/ y funciones como unhex(), hex() espero que lo disfruten!</p>
 
@@ -2013,7 +2013,7 @@ Para estas situaciones, podemos hacer uso de la funcion sleep() y la estructura 
   <entry>
     <title type="html"><![CDATA[[KBEAST] Plantando un Rootkit]]></title>
     <link href="http://q3rv0.github.io/blog/2014/11/17/kbeast-plantando-un-rootkit/"/>
-    <updated>2014-11-17T10:19:05+06:30</updated>
+    <updated>2014-11-17T00:49:05-03:00</updated>
     <id>http://q3rv0.github.io/blog/2014/11/17/kbeast-plantando-un-rootkit</id>
     <content type="html"><![CDATA[<p>Siempre es conveniente asegurarse el silencio luego de una intrusion, y con que me refiero al silencio? Ademas de entrar en el tema de borrado de huellas, me refiero a la accion de dejar un secuas en el servidor que se encargue de ocultar ciertos procesos, archivos, etc que dejemos en el target para esto voy a utilizar a KBeast que es un rootkit 2011, ademas de uno de mis preferidos, tiene soporte para los kernel 2.6.18 y 2.6.32,y presenta varias funcionalidades interesantes como:</p>
 
@@ -2264,7 +2264,7 @@ El fichero de log se guarda en el directorio donde le indicamos que se guarde el
   <entry>
     <title type="html"><![CDATA[remote code execution]]></title>
     <link href="http://q3rv0.github.io/blog/2014/11/17/remote-code-execution/"/>
-    <updated>2014-11-17T10:04:38+06:30</updated>
+    <updated>2014-11-17T00:34:38-03:00</updated>
     <id>http://q3rv0.github.io/blog/2014/11/17/remote-code-execution</id>
     <content type="html"><![CDATA[<p>La ejecucion remota de comandos, como su nombre lo dice, es una vulnerabilidad
 que nos permite inyectar ordenes remotamente en el sistema, basicamente se
@@ -2381,9 +2381,9 @@ El codigo se ejecutaria de la siguiente manera en el script.</p>
   
   <entry>
     <title type="html"><![CDATA[jugando con .htaccess]]></title>
-    <link href="http://q3rv0.github.io/blog/2014/11/17/jugando-con-htaccess/"/>
-    <updated>2014-11-17T09:27:30+06:30</updated>
-    <id>http://q3rv0.github.io/blog/2014/11/17/jugando-con-htaccess</id>
+    <link href="http://q3rv0.github.io/blog/2014/11/16/jugando-con-htaccess/"/>
+    <updated>2014-11-16T23:57:30-03:00</updated>
+    <id>http://q3rv0.github.io/blog/2014/11/16/jugando-con-htaccess</id>
     <content type="html"><![CDATA[<p>La mayoria ya conoce cual es la funcion de este archivo en el servidor encargandose de actuar sobre el fichero de configuracion de apache “httpd.conf”</p>
 
 <p>Permite:</p>
@@ -2407,9 +2407,9 @@ El codigo se ejecutaria de la siguiente manera en el script.</p>
 
 <p>En cuanto a estos tipos de certificados tenemos los:</p>
 
-<p>Basicos: La contraseña viaja en texto plano</p>
+<p>Basicos: Los datos son enviados en texto plano</p>
 
-<p>Resumen: El servidor le aplica un hash al password antes de ser enviado.</p>
+<p>Resumen: Los datos viajan encriptados.</p>
 
 <p>En la siguiente imagen podemos encontrar un servidor que implementa un certificado de tipo basico.</p>
 
@@ -2519,9 +2519,9 @@ El codigo se ejecutaria de la siguiente manera en el script.</p>
   
   <entry>
     <title type="html"><![CDATA[Tecnicas de Blind Mysql Injection]]></title>
-    <link href="http://q3rv0.github.io/blog/2014/11/17/tecnicas-de-blind-mysql-injection/"/>
-    <updated>2014-11-17T08:41:03+06:30</updated>
-    <id>http://q3rv0.github.io/blog/2014/11/17/tecnicas-de-blind-mysql-injection</id>
+    <link href="http://q3rv0.github.io/blog/2014/11/16/tecnicas-de-blind-mysql-injection/"/>
+    <updated>2014-11-16T23:11:03-03:00</updated>
+    <id>http://q3rv0.github.io/blog/2014/11/16/tecnicas-de-blind-mysql-injection</id>
     <content type="html"><![CDATA[<p>Hola como estan todos!? este es un nuevo pdf en el que pretendo desarrollar de manera sencilla y entendible dos tecnicas de inyeccion a ciegas en base de datos Mysql, por un lado me gustaria comenzar a hacer un corto repaso de la tecnica “binary search” que es comunmente las mas usada y conocida para realizar este tipo de ataques<!--more-->, despues pasar a lo que es el metodo “Bit Shifting” y por ultimo culminar con otro metodo que hace uso de la funcion FIND_IN_SET().</p>
 
 <p>Disfruten el documento :)</p>
@@ -2535,9 +2535,9 @@ El codigo se ejecutaria de la siguiente manera en el script.</p>
   
   <entry>
     <title type="html"><![CDATA[Resultado del LAMPSecurity:CTF 6 Challenge]]></title>
-    <link href="http://q3rv0.github.io/blog/2014/11/17/resultado-del-lampsecurity-ctf-6-challenge/"/>
-    <updated>2014-11-17T08:30:28+06:30</updated>
-    <id>http://q3rv0.github.io/blog/2014/11/17/resultado-del-lampsecurity-ctf-6-challenge</id>
+    <link href="http://q3rv0.github.io/blog/2014/11/16/resultado-del-lampsecurity-ctf-6-challenge/"/>
+    <updated>2014-11-16T23:00:28-03:00</updated>
+    <id>http://q3rv0.github.io/blog/2014/11/16/resultado-del-lampsecurity-ctf-6-challenge</id>
     <content type="html"><![CDATA[<p>Hace aproximadamente una semana, la comunidad sec-track en asociacion con hacklabs, lanzo un reto, medio viejito ya, que consistia en encontrar una nueva manera de penetrar en el entorno virtual LAMPSecurity CTF 6, el ganadaor del laboratorio resulto ser killr00t con una intrucion que no me convencio mucho ya que buscando encontre algo parecido ¬¬<!--more-->.</p>
 
 <p>Pero lo felicito de igual manera…y les dejo el solucionario que realize y envie, salvo que no logre conseguir acceso como usuario root en el sistema :(</p>
@@ -2559,9 +2559,9 @@ El codigo se ejecutaria de la siguiente manera en el script.</p>
   
   <entry>
     <title type="html"><![CDATA[admins...admins...]]></title>
-    <link href="http://q3rv0.github.io/blog/2014/11/17/admins-dot-dot-dot-admins-dot-dot-dot/"/>
-    <updated>2014-11-17T08:25:26+06:30</updated>
-    <id>http://q3rv0.github.io/blog/2014/11/17/admins-dot-dot-dot-admins-dot-dot-dot</id>
+    <link href="http://q3rv0.github.io/blog/2014/11/16/admins-dot-dot-dot-admins-dot-dot-dot/"/>
+    <updated>2014-11-16T22:55:26-03:00</updated>
+    <id>http://q3rv0.github.io/blog/2014/11/16/admins-dot-dot-dot-admins-dot-dot-dot</id>
     <content type="html"><![CDATA[<p>Siempre antes de realizar un análisis de puertos y servicios en el servidor, siempre antes que revisar cualquier punto de ataque, estoy acostumbrado a indagar sobre los distintos tipos de archivos que pueda albergar la aplicación en la zona pública: <em>.xls, </em>.sql, <em>docx, </em>.txt, <em>.jsp, </em>.php, etc.<!--more--></p>
 
 <p>Hay ciertas ocaciones en las que uno se encuentra con este tipo de cosas…</p>
@@ -2591,9 +2591,9 @@ Rápidamente me hago con el phpmyadmin</p>
   
   <entry>
     <title type="html"><![CDATA[Backdoor via inyeccion]]></title>
-    <link href="http://q3rv0.github.io/blog/2014/11/17/backdoor-via-inyeccion/"/>
-    <updated>2014-11-17T08:19:41+06:30</updated>
-    <id>http://q3rv0.github.io/blog/2014/11/17/backdoor-via-inyeccion</id>
+    <link href="http://q3rv0.github.io/blog/2014/11/16/backdoor-via-inyeccion/"/>
+    <updated>2014-11-16T22:49:41-03:00</updated>
+    <id>http://q3rv0.github.io/blog/2014/11/16/backdoor-via-inyeccion</id>
     <content type="html"><![CDATA[<p>Cuando se trata de vulnerabilidades de inyeccion de codigo tengo que decir que me encanta, hoy le traigo una manera de conseguir un backdoor en el servidor a travez de una de estas. hay veces que se logra realizar inyecciones de manera satisfactoria dumpeando datos de passwords en texto plano o encriptadas, pero si el<!--more-->panel del administrador esta desabilitado
 u no se logra romper el hash o cualquier situacion negativa que
 haga que esa informacion no sirva para nada, entonces que
@@ -2610,9 +2610,9 @@ hacemos?</p>
   
   <entry>
     <title type="html"><![CDATA[Sqli file inclusion]]></title>
-    <link href="http://q3rv0.github.io/blog/2014/11/17/sqli-file-inclusion/"/>
-    <updated>2014-11-17T08:12:34+06:30</updated>
-    <id>http://q3rv0.github.io/blog/2014/11/17/sqli-file-inclusion</id>
+    <link href="http://q3rv0.github.io/blog/2014/11/16/sqli-file-inclusion/"/>
+    <updated>2014-11-16T22:42:34-03:00</updated>
+    <id>http://q3rv0.github.io/blog/2014/11/16/sqli-file-inclusion</id>
     <content type="html"><![CDATA[<p>En este video pretendo mostrar como a travez de una SQLI se accede a ficheros internos en el servidor, en la intrusion Crackx y yo, nos topamos con el .bash_history del usuario root<!--more-->, parece ser q el administardor agrega usuarios y cambia el password de una manera poco segura diria yo…XD!, gracias a esta falencia logramos acceder al ftp del vps y subir una webshell.</p>
 
 <div class="embed-video-container"><iframe src="//www.youtube.com/embed/VTzpW8OgLts" allowfullscreen></iframe></div>

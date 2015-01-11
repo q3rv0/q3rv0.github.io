@@ -1,114 +1,114 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>http://q3rv0.github.io/blog/2014/12/15/del-spam-a-la-intrusion/</loc>
-    <lastmod>2014-12-15T00:33:48+06:30</lastmod>
+    <loc>http://q3rv0.github.io/blog/2014/12/14/del-spam-a-la-intrusion/</loc>
+    <lastmod>2014-12-14T15:03:48-03:00</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>http://q3rv0.github.io/blog/2014/11/24/desbordando-el-buffer-en-linux-x86-iii-aslr-bypass/</loc>
-    <lastmod>2014-11-24T21:47:55+06:30</lastmod>
+    <lastmod>2014-11-24T12:17:55-03:00</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>http://q3rv0.github.io/blog/2014/11/24/desbordando-el-buffer-en-linux-x86-ii-nop-sled/</loc>
-    <lastmod>2014-11-24T21:32:57+06:30</lastmod>
+    <lastmod>2014-11-24T12:02:57-03:00</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>http://q3rv0.github.io/blog/2014/11/23/desbordando-el-buffer-en-linux-x86-i/</loc>
-    <lastmod>2014-11-23T04:01:07+06:30</lastmod>
+    <loc>http://q3rv0.github.io/blog/2014/11/22/desbordando-el-buffer-en-linux-x86-i/</loc>
+    <lastmod>2014-11-22T18:31:07-03:00</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>http://q3rv0.github.io/blog/2014/11/23/tomando-el-control-de-una-camara-axis-parte-i/</loc>
-    <lastmod>2014-11-23T03:36:54+06:30</lastmod>
+    <loc>http://q3rv0.github.io/blog/2014/11/22/tomando-el-control-de-una-camara-axis-parte-i/</loc>
+    <lastmod>2014-11-22T18:06:54-03:00</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>http://q3rv0.github.io/blog/2014/11/23/escribiendo-un-auxiliar-para-msf/</loc>
-    <lastmod>2014-11-23T03:20:10+06:30</lastmod>
+    <loc>http://q3rv0.github.io/blog/2014/11/22/escribiendo-un-auxiliar-para-msf/</loc>
+    <lastmod>2014-11-22T17:50:10-03:00</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>http://q3rv0.github.io/blog/2014/11/23/mysqli-eb-con-extractvalue/</loc>
-    <lastmod>2014-11-23T03:06:05+06:30</lastmod>
+    <loc>http://q3rv0.github.io/blog/2014/11/22/mysqli-eb-con-extractvalue/</loc>
+    <lastmod>2014-11-22T17:36:05-03:00</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>http://q3rv0.github.io/blog/2014/11/23/lfi-plus-sqli-incluyendo-ficheros-a-travez-de-valores-enteros/</loc>
-    <lastmod>2014-11-23T02:15:42+06:30</lastmod>
+    <loc>http://q3rv0.github.io/blog/2014/11/22/lfi-plus-sqli-incluyendo-ficheros-a-travez-de-valores-enteros/</loc>
+    <lastmod>2014-11-22T16:45:42-03:00</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>http://q3rv0.github.io/blog/2014/11/23/mysql-udf-injection-elevacion-de-privilegios/</loc>
-    <lastmod>2014-11-23T01:28:36+06:30</lastmod>
+    <loc>http://q3rv0.github.io/blog/2014/11/22/mysql-udf-injection-elevacion-de-privilegios/</loc>
+    <lastmod>2014-11-22T15:58:36-03:00</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>http://q3rv0.github.io/blog/2014/11/23/windows-os-evadiendo-las-disable-functions-en-php-con-com/</loc>
-    <lastmod>2014-11-23T01:17:59+06:30</lastmod>
+    <loc>http://q3rv0.github.io/blog/2014/11/22/windows-os-evadiendo-las-disable-functions-en-php-con-com/</loc>
+    <lastmod>2014-11-22T15:47:59-03:00</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>http://q3rv0.github.io/blog/2014/11/17/blind-mysqli-time-based-teoria/</loc>
-    <lastmod>2014-11-17T10:42:51+06:30</lastmod>
+    <lastmod>2014-11-17T01:12:51-03:00</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>http://q3rv0.github.io/blog/2014/11/17/sqli-plus-mod-security-bypass/</loc>
-    <lastmod>2014-11-17T10:37:16+06:30</lastmod>
+    <lastmod>2014-11-17T01:07:16-03:00</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>http://q3rv0.github.io/blog/2014/11/17/kbeast-plantando-un-rootkit/</loc>
-    <lastmod>2014-11-17T10:19:05+06:30</lastmod>
+    <lastmod>2014-11-17T00:49:05-03:00</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>http://q3rv0.github.io/blog/2014/11/17/remote-code-execution/</loc>
-    <lastmod>2014-11-17T10:04:38+06:30</lastmod>
+    <lastmod>2014-11-17T00:34:38-03:00</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>http://q3rv0.github.io/blog/2014/11/17/jugando-con-htaccess/</loc>
-    <lastmod>2014-11-17T09:27:30+06:30</lastmod>
+    <loc>http://q3rv0.github.io/blog/2014/11/16/jugando-con-htaccess/</loc>
+    <lastmod>2014-11-16T23:57:30-03:00</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>http://q3rv0.github.io/blog/2014/11/17/tecnicas-de-blind-mysql-injection/</loc>
-    <lastmod>2014-11-17T08:41:03+06:30</lastmod>
+    <loc>http://q3rv0.github.io/blog/2014/11/16/tecnicas-de-blind-mysql-injection/</loc>
+    <lastmod>2014-11-16T23:11:03-03:00</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>http://q3rv0.github.io/blog/2014/11/17/resultado-del-lampsecurity-ctf-6-challenge/</loc>
-    <lastmod>2014-11-17T08:30:28+06:30</lastmod>
+    <loc>http://q3rv0.github.io/blog/2014/11/16/resultado-del-lampsecurity-ctf-6-challenge/</loc>
+    <lastmod>2014-11-16T23:00:28-03:00</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>http://q3rv0.github.io/blog/2014/11/17/admins-dot-dot-dot-admins-dot-dot-dot/</loc>
-    <lastmod>2014-11-17T08:25:26+06:30</lastmod>
+    <loc>http://q3rv0.github.io/blog/2014/11/16/admins-dot-dot-dot-admins-dot-dot-dot/</loc>
+    <lastmod>2014-11-16T22:55:26-03:00</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>http://q3rv0.github.io/blog/2014/11/17/backdoor-via-inyeccion/</loc>
-    <lastmod>2014-11-17T08:19:41+06:30</lastmod>
+    <loc>http://q3rv0.github.io/blog/2014/11/16/backdoor-via-inyeccion/</loc>
+    <lastmod>2014-11-16T22:49:41-03:00</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>http://q3rv0.github.io/blog/2014/11/17/sqli-file-inclusion/</loc>
-    <lastmod>2014-11-17T08:12:34+06:30</lastmod>
+    <loc>http://q3rv0.github.io/blog/2014/11/16/sqli-file-inclusion/</loc>
+    <lastmod>2014-11-16T22:42:34-03:00</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>http://q3rv0.github.io/</loc>
-    <lastmod>2014-12-17T22:08:05+06:30</lastmod>
+    <lastmod>2015-01-11T19:34:14-03:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>http://q3rv0.github.io/blog/archives/</loc>
-    <lastmod>2014-12-17T22:08:05+06:30</lastmod>
+    <lastmod>2015-01-11T19:34:14-03:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
